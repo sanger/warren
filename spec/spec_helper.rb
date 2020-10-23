@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'Warren'
+require 'pry'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -12,5 +13,12 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+end
+
+# Dummy Rails to get tests working prior to refactor
+module Rails
+  def self.env
+    'test'
   end
 end

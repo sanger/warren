@@ -30,4 +30,8 @@ Gem::Specification.new do |spec|
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
+
+  # Dependencies
+  spec.add_runtime_dependency 'bunny', '~> 2.17.0'
+  spec.add_runtime_dependency 'connection_pool', '~> 2.2.0'
 end
