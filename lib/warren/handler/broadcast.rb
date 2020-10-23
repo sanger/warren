@@ -72,7 +72,7 @@ module Warren
       # @return [void]
       #
       # @yieldreturn [Warren::Broadcast::Channel] A rabbitMQ channel that sends messages to the configured exchange
-      def with_chanel(&block)
+      def with_channel(&block)
         connection_pool.with(&block)
       end
 
@@ -83,11 +83,11 @@ module Warren
       # @param [Warren::Message] message The message to broadcast. Must respond to #routing_key and #payload
       #
       # @return [Warren::Broadcast] Returns itself to allow chaining. But you're
-      #                             probably better off using #with_chanel
+      #                             probably better off using #with_channel
       #                             in that case
       #
       def <<(message)
-        with_chanel { |chanel| chanel << message }
+        with_channel { |channel| channel << message }
         self
       end
 

@@ -1,24 +1,14 @@
 # frozen_string_literal: true
 
-module Warren
-  # Generates a payload of an active_record object
-  class Message
-    attr_reader :record
-
-    def initialize(record)
-      @record = record
-    end
-
-    def routing_key
-      if record.respond_to?(:routing_key)
-        record.routing_key
-      else
-        "#{Rails.env}.saved.#{record.class.name.underscore}.#{record.id}"
-      end
-    end
-
-    def payload
-      MultiJson.dump(record)
-    end
-  end
+# Namespace to collect message formats
+# A Warren compatible message must implement:
+# routing_key: returns the routing_key for the message
+# payloadL returns the message payload
+#
+# Additionally, if you wish to use the Message with the ActiveRecord
+# helpers, then the initialize should take the ActiveRecord::Base object
+# as a single argument
+module Message
 end
+require_relative 'message/short'
+require_relative 'message/full'

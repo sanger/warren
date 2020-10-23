@@ -44,7 +44,7 @@ module Warren
       # @return [void]
       #
       # @yieldreturn [Warren::Test::Channel] A rabbitMQ channel that logs messaged to the test warren
-      def with_chanel
+      def with_channel
         yield Channel.new(self)
       end
 

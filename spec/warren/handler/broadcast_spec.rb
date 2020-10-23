@@ -37,7 +37,7 @@ RSpec.describe Warren::Handler::Broadcast do
     end
 
     it 'yields a channel' do
-      expect { |b| warren.with_chanel(&b) }.to yield_with_args(described_class::Channel)
+      expect { |b| warren.with_channel(&b) }.to yield_with_args(described_class::Channel)
     end
   end
 

@@ -28,12 +28,12 @@ module Warren
       # @return [void]
       #
       # @yieldreturn [Warren::Log::Channel] A rabbitMQ channel that logs messaged to the test warren
-      def with_chanel
+      def with_channel
         yield Channel.new
       end
 
       def <<(message)
-        with_chanel { |c| c << message }
+        with_channel { |c| c << message }
       end
     end
   end
