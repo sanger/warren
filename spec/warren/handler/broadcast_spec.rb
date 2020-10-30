@@ -6,7 +6,7 @@ require 'warren/handler/broadcast'
 
 RSpec.describe Warren::Handler::Broadcast do
   subject(:warren) do
-    described_class.new(server: server_options, exchange: 'exchange', pool_size: 2)
+    described_class.new(server: server_options, exchange: 'exchange', pool_size: 2, routing_key_prefix: 'test')
   end
 
   let(:server_options) { { heartbeat: 30, frame_max: 0 } }
@@ -42,7 +42,9 @@ RSpec.describe Warren::Handler::Broadcast do
   end
 
   describe 'Warren::Broadcast::Channel' do
-    let(:channel) { described_class::Channel.new(bun_channel, exchange: 'exchange') }
+    let(:channel) do
+      described_class::Channel.new(bun_channel, exchange: 'exchange', routing_key_template: 'test.%s')
+    end
 
     describe '#<<' do
       subject { channel << message }
@@ -54,7 +56,7 @@ RSpec.describe Warren::Handler::Broadcast do
           .with('exchange', auto_delete: false, durable: true)
           .and_return(bun_exchange)
         expect(bun_exchange).to receive(:publish)
-          .with('payload', routing_key: 'key')
+          .with('payload', routing_key: 'test.key')
       end
 
       it { is_expected.to be_a(described_class::Channel) }

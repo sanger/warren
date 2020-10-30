@@ -18,12 +18,12 @@ RSpec.describe Warren::Callback do
     allow(broadcast_class).to receive(:name).and_return(mock_name)
   end
 
-  describe '::broadcast_via_warren' do
-    let(:callback_class) { Warren::Callback::BroadcastViaWarren }
+  describe '::broadcast_with_warren' do
+    let(:callback_class) { Warren::Callback::BroadcastWithWarren }
 
     before do
       allow(broadcast_class).to receive(:after_commit)
-      broadcast_class.broadcast_via_warren handler: warren
+      broadcast_class.broadcast_with_warren handler: warren
     end
 
     it 'registers an after commit callback' do
@@ -32,12 +32,12 @@ RSpec.describe Warren::Callback do
     end
   end
 
-  describe '::broadcasts_associated_via_warren' do
-    let(:callback_class) { Warren::Callback::BroadcastAssociatedViaWarren }
+  describe '::broadcasts_associated_with_warren' do
+    let(:callback_class) { Warren::Callback::BroadcastAssociatedWithWarren }
 
     before do
       allow(broadcast_class).to receive(:after_save)
-      broadcast_class.broadcasts_associated_via_warren :association, handler: warren
+      broadcast_class.broadcasts_associated_with_warren :association, handler: warren
     end
 
     it 'registers an after save callback' do

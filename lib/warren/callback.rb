@@ -2,6 +2,9 @@
 
 require_relative 'message/full'
 require 'connection_pool'
+
+require_relative 'callback/broadcast_with_warren'
+require_relative 'callback/broadcast_associated_with_warren'
 #
 # Module Warren::Callback provides methods to assist with
 # setting up message broadcast
@@ -12,7 +15,7 @@ module Warren
   # setting up message broadcast
   #
   module Callback
-    # Provides the broadcast_via_warren and broadcasts_associated_via_warren to
+    # Provides the broadcast_with_warren and broadcasts_associated_with_warren to
     # ActiveRecord::Base classes to configure broadcast
     module ClassMethods
       attr_reader :associated_to_broadcast, :warren
@@ -22,19 +25,20 @@ module Warren
       #
       # @return [void]
       #
-      def broadcast_via_warren(handler: Warren.handler)
-        after_commit BroadcastViaWarren.new(handler: handler)
+      def broadcast_with_warren(handler: Warren.handler)
+        after_commit BroadcastWithWarren.new(handler: handler)
       end
 
       #
-      # When records of this type are saved, broadcast the associated records
+      # When records of this type are saved, broadcast the associated records once
+      # the transaction is closed. (Requires that associated record is broadcast_with_warren)
       #
       # @param [Symbol,Array<Symbol>] associated One or more symbols indicating the associations to broadcast.
       #
       # @return [void]
       #
-      def broadcasts_associated_via_warren(*associated, handler: Warren.handler)
-        after_save BroadcastAssociatedViaWarren.new(associated, handler: handler)
+      def broadcasts_associated_with_warren(*associated, handler: Warren.handler)
+        after_save BroadcastAssociatedWithWarren.new(associated, handler: handler)
       end
     end
 
@@ -54,10 +58,7 @@ module Warren
       # 1) Performance requires something more complicated
       # 2) We find a way to achieve the above without monkey-patching
       #    or other complexity (Its probably possible)
-      warren << Warren::Message::Full.new(self)
+      Warren.handler << Warren::Message::Full.new(self)
     end
   end
 end
-
-require_relative 'callback/broadcast_via_warren'
-require_relative 'callback/broadcast_associated_via_warren'

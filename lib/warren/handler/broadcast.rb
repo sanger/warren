@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'warren/handler'
+require 'bunny'
 
 module Warren
   module Handler
@@ -11,13 +11,14 @@ module Warren
     class Broadcast
       # Wraps a {Bunny::Channel}
       class Channel
-        def initialize(bun_channel, exchange: nil)
+        def initialize(bun_channel, routing_key_template:, exchange: nil)
           @bun_channel = bun_channel
           @exchange_name = exchange
+          @routing_key_template = routing_key_template
         end
 
         def <<(message)
-          exchange.publish(message.payload, routing_key: message.routing_key)
+          exchange.publish(message.payload, routing_key: key_for(message))
           self
         end
 
@@ -32,6 +33,10 @@ module Warren
 
           @exchange ||= @bun_channel.topic(@exchange_name, auto_delete: false, durable: true)
         end
+
+        def key_for(message)
+          @routing_key_template % message.routing_key
+        end
       end
       #
       # Creates a warren but does not connect.
@@ -39,10 +44,13 @@ module Warren
       # @param [Hash] server Server config options passes straight to Bunny
       # @param [String] exchange The name of the exchange to connect to
       # @param [Integer] pool_size The connection pool size
-      def initialize(exchange:, server: {}, pool_size: 14)
+      # @param [String,nil] routing_key_prefix The prefix to pass before the routing key.
+      #                                        Can be used to ensure environments remain distinct.
+      def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14)
         @server = server
         @exchange_name = exchange
         @pool_size = pool_size
+        @routing_key_template = Handler.routing_key_template(routing_key_prefix)
       end
 
       #
@@ -99,7 +107,8 @@ module Warren
 
       def connection_pool
         @connection_pool ||= start_session && ConnectionPool.new(size: @pool_size, timeout: 5) do
-          Channel.new(session.create_channel, exchange: @exchange_name)
+          Channel.new(session.create_channel, exchange: @exchange_name,
+                                              routing_key_template: @routing_key_template)
         end
       end
 

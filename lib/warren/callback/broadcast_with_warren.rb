@@ -4,13 +4,19 @@ require 'warren/message/short'
 
 module Warren
   module Callback
-    # Warren::Callback::BroadcastViaWarren is a Callback class
+    # Warren::Callback::BroadcastWithWarren is a Callback class
     # which is used to handle message broadcast of ActiveRecord::Base objects
     # on commit
     # @see https://guides.rubyonrails.org/active_record_callbacks.html#callback-classes
-    class BroadcastViaWarren
+    class BroadcastWithWarren
       attr_reader :handler, :message_class
 
+      #
+      # Creates the callback object
+      #
+      # @param handler [Warren::Handler] The handler to take the messaged
+      # @param message_class [Warren::Message] The adpater to render the messages
+      #
       def initialize(handler:, message_class: Warren::Message::Short)
         @handler = handler
         @message_class = message_class

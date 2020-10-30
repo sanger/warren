@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative 'lib/Warren/version'
+require_relative 'lib/warren/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'Warren'
+  spec.name          = 'sanger_warren'
   spec.version       = Warren::VERSION
   spec.authors       = ['James Glover']
   spec.email         = ['james.glover@sanger.ac.uk']
@@ -34,4 +34,5 @@ Gem::Specification.new do |spec|
   # Dependencies
   spec.add_runtime_dependency 'bunny', '~> 2.17.0'
   spec.add_runtime_dependency 'connection_pool', '~> 2.2.0'
+  spec.add_runtime_dependency 'multi_json', '~> 1.0'
 end

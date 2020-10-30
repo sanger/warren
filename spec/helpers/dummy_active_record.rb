@@ -15,6 +15,10 @@ class DummyActiveRecord
     'DummyActiveRecord'
   end
 
+  def to_json(_)
+    '{id:1}'
+  end
+
   def initialize(id: 1, association: nil)
     @id = id
     @association = association

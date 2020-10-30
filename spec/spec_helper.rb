@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'simplecov'
+SimpleCov.start
+
 require 'bundler/setup'
-require 'Warren'
+require 'warren'
 require 'pry'
 
 RSpec.configure do |config|
@@ -17,8 +20,8 @@ RSpec.configure do |config|
 end
 
 # Dummy Rails to get tests working prior to refactor
-module Rails
-  def self.env
-    'test'
-  end
-end
+# module Rails
+#   def self.env
+#     'test'
+#   end
+# end

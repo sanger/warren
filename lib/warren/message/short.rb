@@ -11,7 +11,7 @@ module Warren
       end
 
       def routing_key
-        "#{Rails.env}.queue_broadcast.#{record.class.name.underscore}.#{record.id}"
+        "queue_broadcast.#{record.class.name.underscore}.#{record.id}"
       end
 
       def payload

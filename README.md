@@ -22,7 +22,53 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+If using with a Rails app, here's an example to get you started:
+
+```ruby
+# config/initializers/warren.rb
+require 'warren'
+
+Warren.setup(Rails.application.config.warren.deep_symbolize_keys.slice(:type, :config))
+```
+
+```ruby
+# config/application.rb
+# ...
+config.warren = config_for(:warren)
+# ...
+```
+
+```yaml
+# config/warren.yml
+development:
+  type: log
+  config: # Useful to allow easy switching to broadcast in development
+    routing_key_prefix: 'dev'
+    server:
+      host: localhost
+      port: 5672
+      username: guest
+      password: guest
+      vhost: /
+      frame_max: 0
+      heartbeat: 30
+    exchange: exchange_to_use
+test:
+  type: test
+production: # In practice keep this out of your source control
+  type: broadcast
+  config: # Useful to allow easy switching to broadcast
+    routing_key_prefix: 'production'
+    server:
+      host: localhost # Or a remote host
+      port: 5672
+      username: ...
+      password: ...
+      vhost: /
+      frame_max: 0
+      heartbeat: 30
+    exchange: exchange_to_use
+```
 
 ## Development
 

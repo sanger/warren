@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 require 'warren/handler/test'
-require 'warren/callback/broadcast_associated_via_warren'
+require 'warren/callback/broadcast_associated_with_warren'
 
-RSpec.describe Warren::Callback::BroadcastAssociatedViaWarren do
+RSpec.describe Warren::Callback::BroadcastAssociatedWithWarren do
   let(:warren) { Warren::Handler::Test.new(routing_key_prefix: 'test') }
   let(:broadcast_class) do
     Class.new(DummyActiveRecord) do

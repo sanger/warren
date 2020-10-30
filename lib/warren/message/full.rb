@@ -14,7 +14,7 @@ module Warren
         if record.respond_to?(:routing_key)
           record.routing_key
         else
-          "#{Rails.env}.saved.#{record.class.name.underscore}.#{record.id}"
+          "saved.#{record.class.name.underscore}.#{record.id}"
         end
       end
 
