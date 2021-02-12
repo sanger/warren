@@ -13,14 +13,14 @@ module Warren
     case type
     when 'test' then Warren::Handler::Test.new
     when 'log' then Warren::Handler::Log.new(logger: config.fetch(:logger) { Rails.logger })
-    when 'broadcast' then Warren::Handler::Broadcast.new(config)
+    when 'broadcast' then Warren::Handler::Broadcast.new(**config)
     else raise StandardError, "Unknown type warren: #{type}"
     end
   end
 
   def self.setup(opts, logger: Rails.logger)
     logger.warn 'Recreating Warren handler when one already exists' if handler.present?
-    @handler = construct(opts.symbolize_keys)
+    @handler = construct(**opts.symbolize_keys)
   end
 
   def self.handler
