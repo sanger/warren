@@ -38,6 +38,7 @@ module Warren
           @routing_key_template % message.routing_key
         end
       end
+
       #
       # Creates a warren but does not connect.
       #
