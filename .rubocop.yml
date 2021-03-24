@@ -10,6 +10,7 @@
 # See https://docs.rubocop.org/rubocop/configuration
 AllCops:
   TargetRubyVersion: 2.6
+  NewCops: enable
 # Blocks are used to structure tests and are part of the shoulda dsl.
 # The standard BlockLength limits are too stringent for this purpose.
 # Block DSL is also used in routes
