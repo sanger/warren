@@ -5,6 +5,11 @@ require 'bunny'
 require 'warren/handler/broadcast'
 
 RSpec.describe Warren::Handler::Broadcast do
+  # rubocop:todo RSpec/ExpectInHook
+  # rubocop:todo RSpec/StubbedMock
+  # rubocop:todo RSpec/MessageSpies
+  # rubocop:todo RSpec/MultipleMemoizedHelpers
+  # rubocop:todo RSpec/VerifiedDoubles
   subject(:warren) do
     described_class.new(server: server_options, exchange: 'exchange', pool_size: 2, routing_key_prefix: 'test')
   end
@@ -62,4 +67,9 @@ RSpec.describe Warren::Handler::Broadcast do
       it { is_expected.to be_a(described_class::Channel) }
     end
   end
+  # rubocop:enable RSpec/ExpectInHook
+  # rubocop:enable RSpec/StubbedMock
+  # rubocop:enable RSpec/MessageSpies
+  # rubocop:enable RSpec/MultipleMemoizedHelpers
+  # rubocop:enable RSpec/VerifiedDoubles
 end

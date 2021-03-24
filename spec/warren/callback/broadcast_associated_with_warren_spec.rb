@@ -20,18 +20,19 @@ RSpec.describe Warren::Callback::BroadcastAssociatedWithWarren do
   end
 
   before do
-    mock_name = double('name', underscore: 'dummy_active_record')
+    mock_name = double('name', underscore: 'dummy_active_record') # rubocop:todo RSpec/VerifiedDoubles
     allow(broadcast_class).to receive(:name).and_return(mock_name)
   end
 
-  describe '#after_save' do
+  describe '#after_save' do # rubocop:todo RSpec/MultipleMemoizedHelpers
     before { warren.clear_messages }
-    let(:resource) { double('associated', id: 2) }
+
+    let(:resource) { double('associated', id: 2) } # rubocop:todo RSpec/VerifiedDoubles
     let(:resource_key) { 'dummy_active_record' }
     let(:routing_key) { "test.queue_broadcast.#{resource_key}.#{resource.id}" }
 
     it 'broadcasts the associated resource' do
-      expect(resource).to receive(:try).with(:add_to_transaction)
+      expect(resource).to receive(:try).with(:add_to_transaction) # rubocop:todo RSpec/MessageSpies
       callback.after_save(broadcast_class.new(association: resource))
     end
   end

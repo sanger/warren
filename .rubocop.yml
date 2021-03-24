@@ -8,6 +8,10 @@
 # where the inspected file is and continue its way up to the root directory.
 #
 # See https://docs.rubocop.org/rubocop/configuration
+require:
+  - rubocop-rake
+  - rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 2.6
   NewCops: enable
@@ -18,5 +22,5 @@ AllCops:
 # Not sure if we need to split namespaces across several files though.
 # We exclude builders, as they are concerned with rendering xml
 Metrics/BlockLength:
-  ExcludedMethods:
+  IgnoredMethods:
    - describe
