@@ -22,40 +22,9 @@ Or install it yourself as:
 
 ## Usage
 
-If using with a Rails app, here's an example to get you started:
-
-```yaml
-# config/warren.yml
-development:
-  type: log
-  config: # Useful to allow easy switching to broadcast in development
-    routing_key_prefix: 'dev'
-    server:
-      host: localhost
-      port: 5672
-      username: guest
-      password: guest
-      vhost: /
-      frame_max: 0
-      heartbeat: 30
-    exchange: exchange_to_use
-test:
-  type: test
-production: # In practice keep this out of your source control
-  type: broadcast
-  config: # Useful to allow easy switching to broadcast
-    routing_key_prefix: 'production'
-    server:
-      host: localhost # Or a remote host
-      port: 5672
-      username: ...
-      password: ...
-      vhost: /
-      frame_max: 0
-      heartbeat: 30
-    exchange: exchange_to_use
-```
-
+If using with a Rails app, you can simply run `bundle exec warren config` to
+help generate a warren config file. Warren will automatically be initialize
+on Rails start-up.
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

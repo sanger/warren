@@ -10,6 +10,7 @@ Unreleased section to make new releases easy.
 - Added railties to automatically initialize and configure Warren in rails apps.
   You can remove the `config/initializers/warren.rb` and the `config.warren = config_for(:warren)`
   line from `config/application.rb`
+- Added `warren config` CLI to help generate a warren.yml configuration file.
 
 ## Initial release
 

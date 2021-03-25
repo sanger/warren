@@ -5,7 +5,7 @@ module Warren
     # Class Warren::Log provides a dummy RabbitMQ
     # connection pool for use during development
     class Log
-      # Mimics a {Bunny::Channel} but instead passes out to a logger
+      # Mimics a {Broadcast::Channel} but instead passes out to a logger
       class Channel
         def initialize(logger, routing_key_template: '%s')
           @logger = logger
