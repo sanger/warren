@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 require 'warren/app/cli'
-require 'YAML'
+require 'yaml'
 
 RSpec.describe Warren::App::Config do
   describe '::invoke' do
