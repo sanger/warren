@@ -24,20 +24,6 @@ Or install it yourself as:
 
 If using with a Rails app, here's an example to get you started:
 
-```ruby
-# config/initializers/warren.rb
-require 'warren'
-
-Warren.setup(Rails.application.config.warren.deep_symbolize_keys.slice(:type, :config))
-```
-
-```ruby
-# config/application.rb
-# ...
-config.warren = config_for(:warren)
-# ...
-```
-
 ```yaml
 # config/warren.yml
 development:

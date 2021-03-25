@@ -5,6 +5,9 @@ require 'warren/callback'
 require 'warren/handler'
 require 'warren/message'
 
+# Load railties if rails is available
+require 'warren/railtie' if defined?(Rails::Railtie)
+
 #
 # Module Warren provides connection pooling for RabbitMQ Connections
 #
