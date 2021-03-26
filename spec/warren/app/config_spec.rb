@@ -50,7 +50,7 @@ RSpec.describe Warren::App::Config do
 
     context 'with an existing file and complete configuration' do
       before do
-        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite? ").and_return(true)
+        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite (Y/N)? ").and_return(true)
       end
 
       let(:exist) { true }
@@ -68,7 +68,7 @@ RSpec.describe Warren::App::Config do
 
     context 'with an existing file which is aborted' do
       before do
-        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite? ").and_return(false)
+        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite (Y/N)? ").and_return(false)
       end
 
       let(:exist) { true }

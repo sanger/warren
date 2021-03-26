@@ -67,7 +67,7 @@ module Warren
       def check_file?
         return true unless File.exist?(@path)
 
-        @shell.yes? "#{@path} exists. Overwrite? "
+        @shell.yes? "#{@path} exists. Overwrite (Y/N)? "
       end
 
       def ask_exchange
