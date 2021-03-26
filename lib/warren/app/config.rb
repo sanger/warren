@@ -30,6 +30,7 @@ module Warren
         test:
           type: test
       TEMPLATE
+
       def self.invoke(shell, path:, exchange: nil)
         new(shell, path: path, exchange: exchange).invoke
       end

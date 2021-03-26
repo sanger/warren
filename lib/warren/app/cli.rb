@@ -2,6 +2,7 @@
 
 require 'thor'
 require 'warren/app/config'
+require 'warren/app/consumer'
 
 module Warren
   module App
@@ -25,6 +26,9 @@ module Warren
       def config
         Warren::App::Config.invoke(shell, path: options['path'], exchange: options['exchange'])
       end
+
+      desc 'consumer {add|start}', 'add and start queue consumers'
+      subcommand 'consumer', Consumer
     end
   end
 end

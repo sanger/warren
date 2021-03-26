@@ -3,7 +3,7 @@
 # Namespace to collect message formats
 # A Warren compatible message must implement:
 # routing_key: returns the routing_key for the message
-# payloadL returns the message payload
+# payload: returns the message payload
 
 require_relative 'message/short'
 require_relative 'message/full'
