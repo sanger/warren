@@ -10,6 +10,7 @@ RSpec.describe Warren::Handler do
 
     context 'when nil' do
       let(:routing_key_prefix) { nil }
+
       it 'returns a template without a prefix' do
         expect(template % routing_key).to eq(routing_key)
       end
@@ -17,6 +18,7 @@ RSpec.describe Warren::Handler do
 
     context 'when provided' do
       let(:routing_key_prefix) { 'test' }
+
       it 'returns a template with a prefix' do
         expect(template % routing_key).to eq("#{routing_key_prefix}.#{routing_key}")
       end

@@ -11,7 +11,7 @@ require_relative 'callback/broadcast_associated_with_warren'
 #
 module Warren
   #
-  # Module Warren::BroadcastMessages provides methods to assist with
+  # Module Warren::Callback provides methods to assist with
   # setting up message broadcast
   #
   module Callback

@@ -9,7 +9,8 @@ module Warren
     # threadsafe RabbitMQ channels for broadcasting messages
     #
     class Broadcast
-      # Wraps a {Bunny::Channel}
+      # Wraps a Bunny::Channel
+      # @see https://rubydoc.info/gems/bunny/Bunny/Channel
       class Channel
         def initialize(bun_channel, routing_key_template:, exchange: nil)
           @bun_channel = bun_channel
@@ -38,6 +39,7 @@ module Warren
           @routing_key_template % message.routing_key
         end
       end
+
       #
       # Creates a warren but does not connect.
       #

@@ -3,7 +3,50 @@
 module Warren
   module Handler
     # Class Warren::Test provides provides a dummy RabbitMQ
-    # connection pool for use during testing
+    # connection pool for use during testing.
+    #
+    # = Set up a test warren
+    #
+    # By default, the test warren is disabled during testing to avoid storing
+    # messages unnecessarily. Instead you must explicitly enable it when you
+    # wish to test message receipt.
+    #
+    # If using rspec it is suggested that you add the following to your
+    # spec_helper.rb
+    #
+    #   config.around(:each, warren: true) do |ex|
+    #     Warren.handler.enable!
+    #     ex.run
+    #     Warren.handler.disable!
+    #   end
+    #
+    # = Making assertions
+    #
+    # It is possible to query the test warren about the messages it has seen.
+    # In particular the following methods are useful:
+    #
+    # {render:#messages}
+    #
+    # {render:#last_message}
+    #
+    # {render:#message_count}
+    #
+    # {render:#messages_matching}
+    #
+    # = Example
+    #
+    #   describe QcResult, warren: true do
+    #     let(:warren) { Warren.handler }
+    #
+    #     setup { warren.clear_messages }
+    #     let(:resource) { build :qc_result }
+    #     let(:routing_key) { 'test.message.qc_result.' }
+    #
+    #     it 'broadcasts the resource' do
+    #       resource.save!
+    #       expect(warren.messages_matching(routing_key)).to eq(1)
+    #     end
+    #   end
     class Test
       DISABLED_WARNING = <<~DISABLED_WARREN
         Test made against a disabled warren.
@@ -23,7 +66,7 @@ module Warren
 
         You can then tag tests with warren: true to enable warren testing.
       DISABLED_WARREN
-      # Stand in for {Bunny::Channel}, provides a store of messages to use
+      # Stand in for {Broadcast::Channel}, provides a store of messages to use
       # in test assertions
       class Channel
         def initialize(warren)
@@ -34,6 +77,7 @@ module Warren
           @warren << message
         end
       end
+
       #
       # Creates a test warren with no messages.
       # Test warrens are shared across all threads.
@@ -54,8 +98,8 @@ module Warren
       def disconnect; end
 
       #
-      # Yields an exchange which gets returned to the pool on block closure
-      #
+      # Yields a new chanel, which proxies all message back to {messages} on the
+      # {Warren::Handler::Test}
       #
       # @return [void]
       #
@@ -64,22 +108,46 @@ module Warren
         yield Channel.new(self)
       end
 
+      #
+      # Clear any logged messaged
+      #
+      # @return [Array] The new empty array, lacking messages
+      #
       def clear_messages
         @messages = []
       end
 
+      #
+      # Returns the last message received by the warren
+      #
+      # @return [#routing_key#payload] The last message object received by the warren
+      #
       def last_message
         messages.last
       end
 
+      #
+      # Returns the total number message received by the warren since it was enabled
+      #
+      # @return [Integer] The total number of messages
+      #
       def message_count
         messages.length
       end
 
+      #
+      # Returns the total number message received by the warren matching the given
+      # routing_key since it was enabled
+      #
+      # @param routing_key [String] The routing key to filter by
+      #
+      # @return [Integer] The number of matching messages
+      #
       def messages_matching(routing_key)
         messages.count { |message| message.routing_key == routing_key }
       end
 
+      # Enable the warren
       def enable!
         @enabled = true
         clear_messages
@@ -91,6 +159,9 @@ module Warren
         clear_messages
       end
 
+      # Returns an array of all message received by the warren since it was enabled
+      #
+      # @return [Array<#routing_key#payload>] All received messages
       def messages
         raise_if_not_tracking
         @messages

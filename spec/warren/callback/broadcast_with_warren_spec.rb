@@ -6,6 +6,8 @@ require 'warren/callback/broadcast_with_warren'
 
 RSpec.describe Warren::Callback::BroadcastWithWarren do
   let(:warren) { Warren::Handler::Test.new(routing_key_prefix: 'test') }
+  let(:resource_key) { 'dummy_active_record' }
+  let(:routing_key) { "queue_broadcast.#{resource_key}.1" }
   let(:broadcast_class) do
     Class.new(DummyActiveRecord) do
       include Warren::Callback
@@ -20,12 +22,9 @@ RSpec.describe Warren::Callback::BroadcastWithWarren do
   end
 
   before do
-    mock_name = double('name', underscore: 'dummy_active_record')
+    mock_name = double('name', underscore: 'dummy_active_record') # rubocop:todo RSpec/VerifiedDoubles
     allow(broadcast_class).to receive(:name).and_return(mock_name)
   end
-
-  let(:resource_key) { 'dummy_active_record' }
-  let(:routing_key) { "queue_broadcast.#{resource_key}.1" }
 
   describe '#after_commit' do
     it 'broadcasts the resource' do

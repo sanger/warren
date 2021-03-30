@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'warren/app/cli'
+
+Warren::App::Cli.start(ARGV)

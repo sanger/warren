@@ -22,59 +22,29 @@ Or install it yourself as:
 
 ## Usage
 
-If using with a Rails app, here's an example to get you started:
+If using with a Rails app, you can simply run `bundle exec warren config` to
+help generate a warren config file. Warren will automatically be initialize
+on Rails start-up.
 
-```ruby
-# config/initializers/warren.rb
-require 'warren'
+## Testing
 
-Warren.setup(Rails.application.config.warren.deep_symbolize_keys.slice(:type, :config))
-```
+Warren provides useful helpers to assist with testing. Helper documentation, and
+some testing examples can be found in the documentation for the
+{Warren::Handler::Test test helper}, or online at
+[rubydoc.info](https://rubydoc.info/gems/sanger_warren/Warren/Handler/Test)
 
-```ruby
-# config/application.rb
-# ...
-config.warren = config_for(:warren)
-# ...
-```
-
-```yaml
-# config/warren.yml
-development:
-  type: log
-  config: # Useful to allow easy switching to broadcast in development
-    routing_key_prefix: 'dev'
-    server:
-      host: localhost
-      port: 5672
-      username: guest
-      password: guest
-      vhost: /
-      frame_max: 0
-      heartbeat: 30
-    exchange: exchange_to_use
-test:
-  type: test
-production: # In practice keep this out of your source control
-  type: broadcast
-  config: # Useful to allow easy switching to broadcast
-    routing_key_prefix: 'production'
-    server:
-      host: localhost # Or a remote host
-      port: 5672
-      username: ...
-      password: ...
-      vhost: /
-      frame_max: 0
-      heartbeat: 30
-    exchange: exchange_to_use
-```
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run
+`rake spec` to run the tests. You can also run `bin/console` for an interactive
+prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To
+release a new version, update the version number in `version.rb`, and then run
+`bundle exec rake release`, which will create a git tag for the version, push
+git commits and tags, and push the `.gem` file to
+[rubygems.org](https://rubygems.org).
 
 ## Contributing
 
