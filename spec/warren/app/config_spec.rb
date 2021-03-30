@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'warren/app/cli'
+require 'warren/app/config'
 require 'yaml'
 
 RSpec.describe Warren::App::Config do

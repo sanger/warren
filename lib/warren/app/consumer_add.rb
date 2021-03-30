@@ -13,22 +13,17 @@ module Warren
         gather_facts
       end
 
-      private
-
       #
       # Create a new configuration yaml file at {#path} using sensible defaults
       # and the provided {#exchange}. If {#exchange} is nil, prompts the user
       #
       # @return [Void]
       #
-      def invoke
-        return unless check_file?
+      def invoke; end
 
-        @exchange ||= ask_exchange # Update our exchange before we do anything
-        File.open(@path, 'w') do |file|
-          file.write payload
-        end
-      end
+      private
+
+      def gather_facts; end
     end
   end
 end
