@@ -2,7 +2,6 @@
 
 require 'thor'
 require 'warren/app/config'
-require 'pry'
 
 module Warren
   module App
