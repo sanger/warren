@@ -5,9 +5,6 @@ module Warren
   # modify the application when adding Warren.
   # @see https://api.rubyonrails.org/classes/Rails/Railtie.html
   class Railtie < Rails::Railtie
-    # initializer "railtie.configure_rails_initialization" do
-
-    # end
     config.to_prepare do
       config = begin
         Rails.application.config_for(:warren)
