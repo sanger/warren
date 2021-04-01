@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'warren/app/config'
-require 'pry'
-
+require_relative 'consumer_add'
 module Warren
   module App
     # Warren Thor CLI subcommand used to:
@@ -17,18 +15,19 @@ module Warren
       end
 
       desc 'add NAME', 'generate a new warren consumer'
-      option :name, type: :string,
-                    desc: 'The name of the consumer to generate'
       option :desc, type: :string,
                     desc: 'Brief description of consumer'
-      option :exchange, type: :string,
-                        desc: 'The RabbitMQ exchange to connect to'
       option :queue, type: :string,
                      desc: 'The RabbitMQ queue to create / connect to'
       option :bindings, type: :array,
-                        desc: 'bindings between the queue and exchange'
-      def add
+                        desc: 'bindings between the queue and exchange',
+                        banner: '{direct|fanout|topic|headers}:EXCHANGE[:ROUTING_KEY_A[,ROUTING_KEY_B]]'
+      option :path, type: :string,
+                    default: 'config/warren_consumers.yml',
+                    desc: 'The path to the configuration file to generate'
+      def add(name = nil)
         say 'Adding a consumer'
+        Warren::App::ConsumerAdd.invoke(shell, name, options)
       end
 
       desc 'start', 'start registered consumers'

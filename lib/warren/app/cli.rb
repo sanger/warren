@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'warren/app/config'
-require 'warren/app/consumer'
+require_relative 'config'
+require_relative 'consumer'
 
 module Warren
   module App

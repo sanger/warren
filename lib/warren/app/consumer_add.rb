@@ -1,16 +1,49 @@
 # frozen_string_literal: true
 
+require_relative 'exchange_config'
+
 module Warren
   module App
     # Handles the initial creation of the configuration object
     class ConsumerAdd
-      def self.invoke(shell)
-        new(shell).invoke
+      #
+      # Add a consumer to the configuration file located at {#path}
+      # Will prompt the user for input on the {#shell} if information not
+      # provided upfront
+      #
+      # @param shell [Thor::Shell::Basic] Thor shell instance for feedback
+      # @param name [String] The name of the consumer
+      # @param options [Hash] Hash of command line arguments from Thor
+      # @option options [String] :desc Short description of consumer (for documentation)
+      # @option options [String] :queue Then name of the queue to bind to
+      # @option options [Array<String>] :bindings Array of binding in the format
+      #                                 '<exchange_type>:<exchange_name>:<outing_key>,<routing_key>'
+      #
+      # @return [<Type>] <description>
+      #
+      def self.invoke(shell, name, options)
+        new(shell, name, options).invoke
       end
 
-      def initialize(shell)
+      # Create a consumer configuration object. Use {#invoke} to gather information and
+      # generate the config
+      #
+      # @param shell [Thor::Shell::Basic] Thor shell instance for feedback
+      # @param name [String] The name of the consumer
+      # @param options [Hash] Hash of command line arguments from Thor
+      # @option options [String] :desc Short description of consumer (for documentation)
+      # @option options [String] :queue Then name of the queue to bind to
+      # @option options [Array<String>] :bindings Array of binding in the format
+      #                                 '<exchange_type>:<exchange_name>:<outing_key>,<routing_key>'
+      #
+      def initialize(shell, name, options)
         @shell = shell
-        gather_facts
+        @name = name
+        @path = options[:path]
+        @desc = options[:desc]
+        @queue = options[:queue]
+        @config = load_config
+        @bindings = Warren::App::ExchangeConfig.parse(shell, options[:bindings])
       end
 
       #
@@ -19,11 +52,46 @@ module Warren
       #
       # @return [Void]
       #
-      def invoke; end
+      def invoke
+        check_name # Check name before we gather facts, as its better to know we
+        # might have an issue early.
+        gather_facts
+        check_name
+      end
 
       private
 
-      def gather_facts; end
+      def check_name
+        while @config.key?(@name)
+          @name = @shell.ask(
+            "Consumer named '#{@name}' already exists. Specify a alternative " \
+            'consumer name: '
+          )
+        end
+      end
+
+      #
+      # Loads the configuration, should be a hash
+      #
+      # @return [Hash] A hash of consumer configurations indexed by name
+      #
+      def load_config
+        YAML.load_file(@path)
+      rescue Errno::ENOENT
+        {}
+      end
+
+      def gather_facts
+        @name ||= @shell.ask 'Specify a consumer name: '
+        @desc ||= @shell.ask 'Provide an optional description: '
+        @queue ||= @shell.ask 'Provide the name of the queue to connect to: '
+        @bindings ||= gather_bindings
+        nil
+      end
+
+      def gather_bindings
+        Warren::App::ExchangeConfig.ask(@shell)
+      end
     end
   end
 end

@@ -31,6 +31,8 @@ RSpec.describe Warren::App::Config do
         },
         'test' => { 'type' => 'test' }
       }
+      # We're inlining comments, but are mostly concerned with the yaml
+      # content. This ensures that the data map to what we expect
       satisfy('a valid yaml file') { |v| YAML.safe_load(v) == parsed_yaml }
     end
 
