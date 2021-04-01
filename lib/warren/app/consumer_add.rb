@@ -56,7 +56,7 @@ module Warren
         check_name # Check name before we gather facts, as its better to know we
         # might have an issue early.
         gather_facts
-        check_name
+        write_configuration
       end
 
       private
@@ -83,6 +83,7 @@ module Warren
 
       def gather_facts
         @name ||= @shell.ask 'Specify a consumer name: '
+        check_name
         @desc ||= @shell.ask 'Provide an optional description: '
         @queue ||= @shell.ask 'Provide the name of the queue to connect to: '
         @bindings ||= gather_bindings
@@ -91,6 +92,24 @@ module Warren
 
       def gather_bindings
         Warren::App::ExchangeConfig.ask(@shell)
+      end
+
+      def write_configuration
+        @config[@name] = payload
+        File.open(@path, 'w') do |file|
+          file.write YAML.dump(@config)
+        end
+      end
+
+      def payload
+        {
+          'desc' => @desc,
+          'queue' => {
+            'name' => @queue,
+            'options' => { 'durable' => true },
+            'bindings' => @bindings
+          }
+        }
       end
     end
   end

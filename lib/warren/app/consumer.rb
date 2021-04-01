@@ -31,8 +31,12 @@ module Warren
       end
 
       desc 'start', 'start registered consumers'
+      option :path, type: :string,
+                    default: 'config/warren_consumers.yml',
+                    desc: 'The path to the configuration file to generate'
       def start
-        say 'starting a consumer'
+        say 'Starting consumers'
+        Warren::App::ConsumerStart.invoke(shell, name, options)
       end
     end
   end
