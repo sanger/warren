@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'logger'
-
 module Warren
   module Subscriber
     # A message takes a rabbitMQ message, and handles its acknowledgement
