@@ -57,8 +57,8 @@ RSpec.describe Warren::Handler::Broadcast do
       let(:message) { double('message', routing_key: 'key', payload: 'payload') }
 
       before do
-        expect(bun_channel).to receive(:topic)
-          .with('exchange', auto_delete: false, durable: true)
+        expect(bun_channel).to receive(:exchange)
+          .with('exchange', auto_delete: false, durable: true, type: :topic)
           .and_return(bun_exchange)
         expect(bun_exchange).to receive(:publish)
           .with('payload', routing_key: 'test.key')

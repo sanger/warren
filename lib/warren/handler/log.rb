@@ -18,10 +18,42 @@ module Warren
           self
         end
 
+        def exchange(name, options)
+          @logger.debug "Declared exchange: #{name}, #{options.inspect}"
+          Exchange.new(name, options)
+        end
+
+        def queue(name, options)
+          @logger.debug "Declared queue: #{name}, #{options.inspect}"
+          Queue.new(@logger, name)
+        end
+
+        # NOOP - Provided for API compatibility
+        def prefetch(number); end
+
         private
 
         def key_for(message)
           @routing_key_template % message.routing_key
+        end
+      end
+
+      Exchange = Struct.new(:name, :options)
+
+      # Queue class to provide extended logging in development mode
+      class Queue
+        def initialize(logger, name)
+          @logger = logger
+          @name = name
+        end
+
+        def bind(exchange, options)
+          @logger.debug "Bound queue #{@name}: #{exchange}, #{options.inspect}"
+        end
+
+        def subscribe(options)
+          @logger.debug "Subscribed to queue #{@name}: #{options.inspect}"
+          @logger.warn 'This is a Warren::Handler::Log no messages will be processed'
         end
       end
 

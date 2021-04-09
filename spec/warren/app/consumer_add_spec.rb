@@ -8,40 +8,31 @@ require 'warren/app/consumer_add'
 RSpec.describe Warren::App::ConsumerAdd do
   describe '::invoke' do
     let(:shell) { instance_double(Thor::Shell::Basic) }
-    let(:expected_payload) do
-      parsed_yaml = {
-        'existing_consumer' => {},
-        'consumer_name' => {
-          'desc' => 'my consumer',
-          'queue' => {
-            'name' => 'queue_name',
-            'options' => { 'durable' => true },
-            'bindings' => [
-              {
-                'exchange' => { 'name' => 'exchange_name', 'type' => 'direct' },
-                'options' => { routing_key: 'c' }
-              }
-            ]
-          }
-        }
-      }
-      satisfy('a valid yaml file') { |v| YAML.safe_load(v, permitted_classes: [Symbol]) == parsed_yaml }
-    end
+
     let(:path) { 'tmp/test.yml' }
-    let(:file) { instance_double(File, write: 20) }
+    let(:consumer_config) { instance_double(Warren::Config::Consumers) }
 
     before do
-      allow(YAML).to receive(:load_file)
-        .with(path)
-        .and_return({
-                      'existing_consumer' => {}
-                    })
-      allow(File).to receive(:open).with(path, 'w').and_yield(file)
+      allow(Warren::Config::Consumers).to receive(:new).and_return(consumer_config)
+      allow(consumer_config).to receive(:consumer_exist?).with('existing_consumer')
+                                                         .and_return(true)
+      allow(consumer_config).to receive(:consumer_exist?).with('consumer_name')
+                                                         .and_return(false)
+      allow(consumer_config).to receive(:add_consumer)
+      allow(consumer_config).to receive(:save)
     end
 
     shared_examples 'a consumer addition' do
       it 'updates the configuration' do
-        expect(file).to have_received(:write).with(expected_payload)
+        expect(consumer_config).to have_received(:add_consumer)
+          .with('consumer_name', desc: 'my consumer', queue: 'queue_name', bindings: [{
+                  'exchange' => { 'name' => 'exchange_name', 'type' => 'direct' },
+                  'options' => { routing_key: 'c' }
+                }])
+      end
+
+      it 'saves the configuration' do
+        expect(consumer_config).to have_received(:save)
       end
     end
 

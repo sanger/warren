@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'bunny'
+require 'forwardable'
 
 module Warren
   module Handler
@@ -12,6 +13,10 @@ module Warren
       # Wraps a Bunny::Channel
       # @see https://rubydoc.info/gems/bunny/Bunny/Channel
       class Channel
+        extend Forwardable
+
+        def_delegators :@bun_channel, :close, :exchange, :queue, :prefetch
+
         def initialize(bun_channel, routing_key_template:, exchange: nil)
           @bun_channel = bun_channel
           @exchange_name = exchange
@@ -19,20 +24,16 @@ module Warren
         end
 
         def <<(message)
-          exchange.publish(message.payload, routing_key: key_for(message))
+          default_exchange.publish(message.payload, routing_key: key_for(message))
           self
-        end
-
-        def close
-          @bun_channel.close
         end
 
         private
 
-        def exchange
+        def default_exchange
           raise StandardError, 'No exchange configured' if @exchange_name.nil?
 
-          @exchange ||= @bun_channel.topic(@exchange_name, auto_delete: false, durable: true)
+          @default_exchange ||= exchange(@exchange_name, auto_delete: false, durable: true, type: :topic)
         end
 
         def key_for(message)
@@ -76,12 +77,12 @@ module Warren
       end
 
       #
-      # Yields an exchange which gets returned to the pool on block closure
-      #
+      # Yields an {Warren::Handler::Broadcast::Channel} which gets returned to the pool on block closure
       #
       # @return [void]
       #
-      # @yieldreturn [Warren::Broadcast::Channel] A rabbitMQ channel that sends messages to the configured exchange
+      # @yieldparam [Warren::Handler::Broadcast::Channel] A rabbitMQ channel that sends messages to the configured
+      #                                                    exchange
       def with_channel(&block)
         connection_pool.with(&block)
       end
@@ -92,7 +93,7 @@ module Warren
       #
       # @param [Warren::Message] message The message to broadcast. Must respond to #routing_key and #payload
       #
-      # @return [Warren::Broadcast] Returns itself to allow chaining. But you're
+      # @return [Warren::Handler::Broadcast] Returns itself to allow chaining. But you're
       #                             probably better off using #with_channel
       #                             in that case
       #

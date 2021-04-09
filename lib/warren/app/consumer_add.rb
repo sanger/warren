@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'exchange_config'
+require 'warren/config/consumers'
 
 module Warren
   module App
@@ -19,7 +20,7 @@ module Warren
       # @option options [Array<String>] :bindings Array of binding in the format
       #                                 '<exchange_type>:<exchange_name>:<outing_key>,<routing_key>'
       #
-      # @return [<Type>] <description>
+      # @return [ConsumerAdd] The ConsumerAdd
       #
       def self.invoke(shell, name, options)
         new(shell, name, options).invoke
@@ -39,10 +40,9 @@ module Warren
       def initialize(shell, name, options)
         @shell = shell
         @name = name
-        @path = options[:path]
         @desc = options[:desc]
         @queue = options[:queue]
-        @config = load_config
+        @config = Warren::Config::Consumers.new(options[:path])
         @bindings = Warren::App::ExchangeConfig.parse(shell, options[:bindings])
       end
 
@@ -53,7 +53,7 @@ module Warren
       # @return [Void]
       #
       def invoke
-        check_name # Check name before we gather facts, as its better to know we
+        check_name if @name # Check name before we gather facts, as its better to know we
         # might have an issue early.
         gather_facts
         write_configuration
@@ -62,7 +62,7 @@ module Warren
       private
 
       def check_name
-        while @config.key?(@name)
+        while @config.consumer_exist?(@name)
           @name = @shell.ask(
             "Consumer named '#{@name}' already exists. Specify a alternative " \
             'consumer name: '
@@ -95,21 +95,8 @@ module Warren
       end
 
       def write_configuration
-        @config[@name] = payload
-        File.open(@path, 'w') do |file|
-          file.write YAML.dump(@config)
-        end
-      end
-
-      def payload
-        {
-          'desc' => @desc,
-          'queue' => {
-            'name' => @queue,
-            'options' => { 'durable' => true },
-            'bindings' => @bindings
-          }
-        }
+        @config.add_consumer(@name, desc: @desc, queue: @queue, bindings: @bindings)
+        @config.save
       end
     end
   end

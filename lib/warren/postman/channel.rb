@@ -7,14 +7,13 @@ class Postman
   class Channel
     extend Forwardable
 
-    def initialize(client:, config:, type: :topic)
-      @client = client
-      @exchange_name = config[:exchange]
-      @queue_name = config[:queue]
-      @routing_keys = config[:routing_keys]
-      @deadletter_exchange = config[:deadletter_exchange]
-      @ttl = config[:ttl]
-      @type = type
+    attr_reader :channel
+
+    def initialize(channel:, config:)
+      @channel = channel
+      @queue_name = config.dig('queue', 'name')
+      @queue_options = config.dig('queue', 'options')
+      @bindings = config.dig('queue', 'bindings')
     end
 
     def_delegators :channel, :nack, :reject, :ack
@@ -24,31 +23,20 @@ class Postman
       queue.subscribe(manual_ack: true, block: false, consumer_tag: consumer_tag, durable: true, &block)
     end
 
-    # Publishes a message to the configured queue
-    def publish(payload, options)
-      options[:persistent] = true
-      exchange.publish(payload, options)
-    end
-
     # Ensures the queues and channels are set up to receive messages
     # keys: additional routing_keys to bind
-    def activate!(keys: [])
+    def activate!
       establish_bindings!
-      keys.each { |key| add_routing_key(key) }
     end
 
-    def add_routing_key(key)
-      queue.bind(exchange, routing_key: key)
+    def add_binding(exchange, options)
+      queue.bind(exchange, options)
     end
 
     private
 
-    def channel
-      @channel ||= @client.create_channel
-    end
-
-    def exchange
-      channel.public_send(@type, @exchange_name, auto_delete: false, durable: true)
+    def exchange(config)
+      channel.exchange(*config.values_at('name', 'options'))
     end
 
     def queue
@@ -63,16 +51,11 @@ class Postman
       config
     end
 
-    def routing_keys
-      if @type == :topic
-        @routing_keys
-      else
-        [:topic]
-      end
-    end
-
     def establish_bindings!
-      routing_keys.each { |key| add_routing_key(key) }
+      @bindings.each do |binding_config|
+        exchange = exchange(binding_config['exchange'])
+        add_binding(exchange, binding_config['options'])
+      end
     end
   end
 end

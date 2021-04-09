@@ -2,11 +2,11 @@
 
 APP_PATH = File.expand_path('../config/application', __dir__)
 
-require 'daemons'
 require 'bunny'
-require 'rails'
-require './lib/postman'
-require './lib/postman/channel'
+# require 'rails'
+require 'pry'
+require 'warren/postman'
+require 'warren/postman/channel'
 
 # Sets up a pool of workers to process the rebroadcast queues
 # This class handles the extraction of command-line parameters
@@ -14,12 +14,6 @@ require './lib/postman/channel'
 # @example Basic usage
 # `bundle exec bin/amqp_client start`
 class AmqpClient
-  APP_NAME = 'queue_broadcast_consumer'
-  DEFAULT_WORKERS = 2
-  DEFAULT_PID_DIR = './tmp/pids'
-
-  NotImplimented = Class.new(StandardError)
-
   # Spawns and daemonizes multiple postmen.
   class WorkerPool
     #
@@ -27,15 +21,13 @@ class AmqpClient
     # {AmqpClient} and run in daemonized processes.
     # @param app_name [String] The name of the application. Corresponds to the
     #                          subscriptions config in `config/warren.yml`
-    # @param pid_dir [String] Path to the pid directory
     # @param workers [Integer] Number of workers to spawn on daemonization
     # @param instance [nil,Integer] Index of the particular worker to start/stop [Optional]
     # @param config [Hash] A configuration object, loaded from `config/warren.yml` by default
     #
     # @return [type] [description]
-    def initialize(app_name, pid_dir, workers, instance, config = nil)
+    def initialize(app_name, workers, instance, config)
       @app_name = app_name
-      @pid_dir = pid_dir
       @worker_count = workers
       @instance = instance
       @config = config
@@ -60,20 +52,13 @@ class AmqpClient
     # We preload our application before forking!
     def load_rails!
       $stdout.puts 'Loading application...'
-      require_relative '../config/environment'
+      require './config/environment'
+      Warren.load_configuration
       # We need to disconnect before forking.
       $stdout.puts 'Registering queues'
-      register_deadletters_queues
+      # register_deadletters_queues
       ActiveRecord::Base.connection.disconnect!
       $stdout.puts 'Loaded!'
-    end
-
-    #
-    # The queue and exchange configuration for this pool
-    #
-    # @return [Hash] Configuration object, usually loaded from `config/warren.yml`
-    def config
-      @config ||= Rails.application.config.warren.symbolize_keys
     end
 
     #
@@ -82,12 +67,10 @@ class AmqpClient
     #
     # @return [Void] Blocking. Will not return until the {Postman} is terminated
     def spawn_postman
-      client = Bunny.new(server_config)
-      main_exchange = Postman::Channel.new(client: client, config: queue_config)
-      Postman.new(
-        client: client,
-        main_exchange: main_exchange
-      ).run!
+      Warren.handler.with_channel do |channel|
+        main_exchange = Postman::Channel.new(channel: channel, config: queue_config)
+        Postman.new(name: @app_name, main_exchange: main_exchange).run!
+      end
     end
 
     #
@@ -95,8 +78,7 @@ class AmqpClient
     #
     # @return [Void]
     def register_deadletters_queues
-      client = Bunny.new(server_config)
-      main_exchange = Postman::Channel.new(client: client, config: queue_config('.deadletters'))
+      main_exchange = Postman::Channel.new(handler: Warren.handler, config: queue_config('.deadletters'))
       client.start
       main_exchange.activate!
       client.stop
@@ -109,11 +91,11 @@ class AmqpClient
     # @param instance [String] The worker we are spawning
     #
     # @return [Void]
-    def daemon(instance)
-      Daemons.run_proc(server_name(instance), multiple: multiple, dir: @pid_dir, backtrace: true, log_output: true) do
-        ActiveRecord::Base.establish_connection # We reconnect to the database after the fork.
-        spawn_postman
-      end
+    def daemon(_instance)
+      # Daemons.run_proc(server_name(instance), multiple: multiple, dir: @pid_dir, backtrace: true, log_output: true) do
+      #   ActiveRecord::Base.establish_connection # We reconnect to the database after the fork.
+      spawn_postman
+      # end
     end
 
     # Returns true unless we are spawning a specific instance
@@ -121,12 +103,8 @@ class AmqpClient
       @instance.nil?
     end
 
-    def server_config
-      config.dig(:config, 'server').deep_symbolize_keys || {}
-    end
-
     def queue_config(config_suffix = nil)
-      config.dig(:subscriptions, "#{@app_name}#{config_suffix}").deep_symbolize_keys
+      @config.consumer("#{@app_name}#{config_suffix}")
     end
 
     #
@@ -139,39 +117,18 @@ class AmqpClient
     end
   end
 
-  attr_reader :workers, :instance, :pid_dir
+  attr_reader :workers, :instance, :config
 
-  def initialize(args)
-    @action = args.first
-    # TODO: DRY this out
-    self.workers = args.detect { |arg| arg =~ /\Aw[0-9]+\z/ }
-    self.instance = args.detect { |arg| arg =~ /\Ai[0-9]+\z/ }
-    self.pid_dir = args.detect { |arg| arg =~ /\Apid_dir=.+\z/ }
-  end
-
-  # TODO: DRY this out
-  def workers=(workers_config)
-    @workers = if workers_config.nil?
-                 DEFAULT_WORKERS
-               else
-                 workers_config.slice(1, workers_config.length).to_i
-               end
-  end
-
-  def pid_dir=(pid_dir_config)
-    @pid_dir = if pid_dir_config.nil?
-                 DEFAULT_PID_DIR
-               else
-                 /\Apid_dir=(.+)\z/.match(pid_dir_config)[1]
-               end
-  end
-
-  def instance=(instance_config)
-    @instance = instance_config.slice(1, instance_config.length).to_i if instance_config.present?
+  def initialize(config, consumers: nil)
+    @action = 'start'
+    @config = config
+    @workers = 1
+    @instance = 1
+    @consumers = consumers
   end
 
   def worker_pool
-    @worker_pool ||= WorkerPool.new(APP_NAME, pid_dir, worker_count, instance)
+    @worker_pool ||= WorkerPool.new(@consumers.first, worker_count, instance, config)
   end
 
   def run

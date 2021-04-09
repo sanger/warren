@@ -29,4 +29,22 @@ module Warren
   def self.handler
     @handler
   end
+
+  # When we invoke the warren consumer, we end up loading warren before
+  # rails is loaded, so don't invoke the railtie, and don't get a change to do
+  # so until after the Rails has initialized, and thus run its ties.
+  # I'm sure there is a proper way of handling this, but want to move on for now.
+  def self.load_configuration
+    config = begin
+      Rails.application.config_for(:warren)
+    rescue RuntimeError => e
+      warn <<~WARN
+        🐇 WARREN CONFIGURATION ERROR
+        #{e.message}
+        Use `warren config` to generate a basic configuration file
+      WARN
+      exit 1
+    end
+    Warren.setup(config.deep_symbolize_keys.slice(:type, :config))
+  end
 end

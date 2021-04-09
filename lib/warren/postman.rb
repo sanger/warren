@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'bunny'
+require 'warren'
 require 'warren/postman/state_machine'
 require 'warren/postman/channel'
 require 'warren/subscriber/base'
@@ -13,11 +15,10 @@ class Postman
   # Maximum wait time between database retries: 5 minutes
   MAX_RECONNECT_DELAY = 60 * 5
 
-  attr_reader :client, :state, :main_exchange
+  attr_reader :state, :main_exchange
 
-  def initialize(client:, main_exchange:)
-    @client = client
-    @consumer_tag = "qbm_#{Rails.env}_#{Process.pid}"
+  def initialize(name:, main_exchange:)
+    @consumer_tag = "#{Rails.env}_#{name}_#{Process.pid}"
     @state = :initialized
     @main_exchange = main_exchange
   end
@@ -33,12 +34,9 @@ class Postman
     !stopped?
   end
 
-  # Yup, this will almost certainly get simpler
-  # rubocop:todo Metrics/MethodLength
   def run!
     starting!
     trap_signals
-    @client.start # Start the client
     main_exchange.activate! # Set up the queues
     running!            # Transition to running state
     subscribe!          # Subscribe to the queue
@@ -48,10 +46,7 @@ class Postman
     # And we leave the application
     info "Stopped #{@consumer_tag}"
     info 'Goodbye!'
-  ensure
-    @client.close
   end
-  # rubocop:enable Metrics/MethodLength
 
   def stop!
     stopping!

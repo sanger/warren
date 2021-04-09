@@ -2,6 +2,9 @@
 
 require 'thor'
 require_relative 'consumer_add'
+require_relative 'consumer_start'
+require 'warren/config/consumers'
+
 module Warren
   module App
     # Warren Thor CLI subcommand used to:
@@ -23,8 +26,8 @@ module Warren
                         desc: 'bindings between the queue and exchange',
                         banner: '{direct|fanout|topic|headers}:EXCHANGE[:ROUTING_KEY_A[,ROUTING_KEY_B]]'
       option :path, type: :string,
-                    default: 'config/warren_consumers.yml',
-                    desc: 'The path to the configuration file to generate'
+                    default: Warren::Config::Consumers::DEFAULT_PATH,
+                    desc: 'The path to the consumer configuration file to generate'
       def add(name = nil)
         say 'Adding a consumer'
         Warren::App::ConsumerAdd.invoke(shell, name, options)
@@ -32,11 +35,14 @@ module Warren
 
       desc 'start', 'start registered consumers'
       option :path, type: :string,
-                    default: 'config/warren_consumers.yml',
-                    desc: 'The path to the configuration file to generate'
+                    default: Warren::Config::Consumers::DEFAULT_PATH,
+                    desc: 'The path to the consumer configuration file to use'
+      option :consumers, type: :array,
+                         desc: 'The consumers to start. Defaults to all consumers',
+                         banner: 'consumer_name other_consumer'
       def start
         say 'Starting consumers'
-        Warren::App::ConsumerStart.invoke(shell, name, options)
+        Warren::App::ConsumerStart.invoke(shell, options)
       end
     end
   end
