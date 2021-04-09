@@ -26,10 +26,11 @@ RSpec.describe Warren::App::Config do
               'frame_max' => 0,
               'heartbeat' => 30
             },
-            'exchange' => 'exchange'
+            'exchange' => 'exchange',
+            'routing_key_prefix' => 'development'
           }
         },
-        'test' => { 'type' => 'test' }
+        'test' => { 'type' => 'test', 'routing_key_prefix' => 'test' }
       }
       # We're inlining comments, but are mostly concerned with the yaml
       # content. This ensures that the data map to what we expect

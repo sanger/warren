@@ -28,11 +28,13 @@ module Warren
               frame_max: 0
               heartbeat: 30
             exchange: %<exchange>s
+            routing_key_prefix: development
         # The test environment sets up a test message handler, which lets
         # you make assertions about which messages have been sent.
         # See: https://rubydoc.info/gems/sanger_warren/Warren/Handler/Test
         test:
           type: test
+          routing_key_prefix: test
       TEMPLATE
 
       def self.invoke(shell, path:, exchange: nil)
