@@ -3,8 +3,6 @@
 APP_PATH = File.expand_path('../config/application', __dir__)
 
 require 'bunny'
-# require 'rails'
-require 'pry'
 require 'warren/postman'
 require 'warren/subscription'
 

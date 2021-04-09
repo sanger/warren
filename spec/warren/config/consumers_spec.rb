@@ -38,7 +38,7 @@ RSpec.describe Warren::Config::Consumers do
         'desc' => 'description',
         'queue' => {
           'name' => 'queue_name',
-          'options' => { durable: true },
+          'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => 'name.dead-letters' } },
           'bindings' => []
         }
       }
@@ -63,7 +63,7 @@ RSpec.describe Warren::Config::Consumers do
           'desc' => 'description',
           'queue' => {
             'name' => 'queue_name',
-            'options' => { durable: true },
+            'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => 'name.dead-letters' } },
             'bindings' => [
               {
                 'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct', durable: true } },

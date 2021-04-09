@@ -121,7 +121,7 @@ module Warren
 
       def add_binding(type, name, options)
         @bindings << {
-          'exchange' => { 'name' => name, 'type' => type },
+          'exchange' => { 'name' => name, 'options' => { type: type } },
           'options' => options
         }
       end

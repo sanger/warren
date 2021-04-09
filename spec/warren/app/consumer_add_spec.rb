@@ -26,7 +26,7 @@ RSpec.describe Warren::App::ConsumerAdd do
       it 'updates the configuration' do
         expect(consumer_config).to have_received(:add_consumer)
           .with('consumer_name', desc: 'my consumer', queue: 'queue_name', bindings: [{
-                  'exchange' => { 'name' => 'exchange_name', 'type' => 'direct' },
+                  'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
                   'options' => { routing_key: 'c' }
                 }])
       end
@@ -73,7 +73,7 @@ RSpec.describe Warren::App::ConsumerAdd do
         allow(Warren::App::ExchangeConfig).to receive(:ask)
           .with(shell)
           .and_return([{
-                        'exchange' => { 'name' => 'exchange_name', 'type' => 'direct' },
+                        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
                         'options' => { routing_key: 'c' }
                       }])
         invocation

@@ -15,7 +15,7 @@ module Warren
       class Channel
         extend Forwardable
 
-        def_delegators :@bun_channel, :close, :exchange, :queue, :prefetch
+        def_delegators :@bun_channel, :close, :exchange, :queue, :prefetch, :ack, :nack
 
         def initialize(bun_channel, routing_key_template:, exchange: nil)
           @bun_channel = bun_channel

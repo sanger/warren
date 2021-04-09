@@ -26,7 +26,7 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'd' }
       let(:exchange_config) do
         {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'direct' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
           'options' => { routing_key: 'key_a' }
         }
       end
@@ -42,7 +42,7 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'f' }
       let(:exchange_config) do
         {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'fanout' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout' } },
           'options' => {}
         }
       end
@@ -60,10 +60,10 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 't' }
       let(:exchange_config) do
         [{
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'topic' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
           'options' => { routing_key: 'key_a' }
         }, {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'topic' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
           'options' => { routing_key: 'key_b' }
         }]
       end
@@ -80,7 +80,7 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'h' }
       let(:exchange_config) do
         {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'header' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header' } },
           'options' => { arguments: {} }
         }
       end
@@ -97,7 +97,7 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'direct:exchange_name:key_a' }
       let(:exchange_config) do
         {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'direct' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
           'options' => { routing_key: 'key_a' }
         }
       end
@@ -109,7 +109,7 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'fanout:exchange_name' }
       let(:exchange_config) do
         {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'fanout' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout' } },
           'options' => {}
         }
       end
@@ -121,10 +121,10 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'topic:exchange_name:key_a,key_b' }
       let(:exchange_config) do
         [{
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'topic' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
           'options' => { routing_key: 'key_a' }
         }, {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'topic' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
           'options' => { routing_key: 'key_b' }
         }]
       end
@@ -140,7 +140,7 @@ RSpec.describe Warren::App::ExchangeConfig do
       let(:choice) { 'header:exchange_name' }
       let(:exchange_config) do
         {
-          'exchange' => { 'name' => 'exchange_name', 'type' => 'header' },
+          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header' } },
           'options' => { arguments: {} }
         }
       end

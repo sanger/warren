@@ -146,6 +146,6 @@ class Postman
   end
 
   def process(delivery_info, metadata, payload)
-    Postman::Message.new(self, delivery_info, metadata, payload)._process_
+    Warren::Subscriber::Base.new(self, delivery_info, metadata, payload)._process_
   end
 end

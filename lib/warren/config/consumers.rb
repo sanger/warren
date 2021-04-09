@@ -57,7 +57,7 @@ module Warren
           'desc' => desc,
           'queue' => {
             'name' => queue,
-            'options' => { durable: true },
+            'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => "#{name}.dead-letters" } },
             'bindings' => bindings
           }
         }
