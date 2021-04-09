@@ -4,7 +4,6 @@ require 'forwardable'
 require 'bunny'
 require 'warren'
 require 'warren/helpers/state_machine'
-require 'warren/postman/channel'
 require 'warren/subscriber/base'
 
 # A postman listens to a rabbitMQ message queues
@@ -15,12 +14,12 @@ class Postman
   # Maximum wait time between database retries: 5 minutes
   MAX_RECONNECT_DELAY = 60 * 5
 
-  attr_reader :state, :main_exchange
+  attr_reader :state, :subscription
 
-  def initialize(name:, main_exchange:)
+  def initialize(name:, subscription:)
     @consumer_tag = "#{Rails.env}_#{name}_#{Process.pid}"
     @state = :initialized
-    @main_exchange = main_exchange
+    @subscription = subscription
   end
 
   states :stopping, :stopped, :paused, :starting, :started, :running
@@ -37,7 +36,7 @@ class Postman
   def run!
     starting!
     trap_signals
-    main_exchange.activate! # Set up the queues
+    subscription.activate! # Set up the queues
     running!            # Transition to running state
     subscribe!          # Subscribe to the queue
     # Monitor our state to control stopping and re-connection
@@ -99,7 +98,7 @@ class Postman
   def subscribe!
     raise StandardError, 'Consumer already exists' unless @consumer.nil?
 
-    @consumer = @main_exchange.subscribe(@consumer_tag) do |delivery_info, metadata, payload|
+    @consumer = @subscription.subscribe(@consumer_tag) do |delivery_info, metadata, payload|
       process(delivery_info, metadata, payload)
     end
   end

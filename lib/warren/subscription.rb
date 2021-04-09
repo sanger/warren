@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require_relative '../postman'
-
-class Postman
-  # Configures and wraps a Bunny Channel/Queue
-  class Channel
+module Warren
+  # Configures and wraps up subscriptions on a Bunny Channel/Queue
+  class Subscription
     extend Forwardable
 
     attr_reader :channel
@@ -16,7 +14,7 @@ class Postman
       @bindings = config.dig('queue', 'bindings')
     end
 
-    def_delegators :channel, :nack, :reject, :ack
+    def_delegators :channel, :nack, :ack
 
     def subscribe(consumer_tag, &block)
       channel.prefetch(10)
@@ -42,13 +40,7 @@ class Postman
     def queue
       raise StandardError, 'No queue configured' if @queue_name.nil?
 
-      channel.queue(@queue_name, arguments: queue_arguments, durable: true)
-    end
-
-    def queue_arguments
-      config = { 'x-dead-letter-exchange' => @deadletter_exchange }
-      config['x-message-ttl'] = @ttl if @ttl.present?
-      config
+      channel.queue(@queue_name, @queue_options)
     end
 
     def establish_bindings!

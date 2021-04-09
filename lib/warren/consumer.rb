@@ -6,7 +6,7 @@ require 'bunny'
 # require 'rails'
 require 'pry'
 require 'warren/postman'
-require 'warren/postman/channel'
+require 'warren/subscription'
 
 # Sets up a pool of workers to process the rebroadcast queues
 # This class handles the extraction of command-line parameters
@@ -68,8 +68,8 @@ class AmqpClient
     # @return [Void] Blocking. Will not return until the {Postman} is terminated
     def spawn_postman
       Warren.handler.with_channel do |channel|
-        main_exchange = Postman::Channel.new(channel: channel, config: queue_config)
-        Postman.new(name: @app_name, main_exchange: main_exchange).run!
+        subscription = Warren::Subscription.new(channel: channel, config: queue_config)
+        Postman.new(name: @app_name, subscription: subscription).run!
       end
     end
 
@@ -78,9 +78,9 @@ class AmqpClient
     #
     # @return [Void]
     def register_deadletters_queues
-      main_exchange = Postman::Channel.new(handler: Warren.handler, config: queue_config('.deadletters'))
+      subscription = Warren::Subscription.new(handler: Warren.handler, config: queue_config('.deadletters'))
       client.start
-      main_exchange.activate!
+      subscription.activate!
       client.stop
     end
 
