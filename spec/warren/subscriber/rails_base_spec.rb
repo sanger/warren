@@ -13,14 +13,14 @@ RSpec.describe Warren::Subscriber::RailsBase do
     described_class.new(postman, delivery_info, metadata, payload)
   end
 
-  let(:postman) { instance_double('Postman', main_exchange: main_exchange) }
-  let(:main_exchange) { instance_double('Postman::Channel', 'main_exchange') }
+  let(:postman) { instance_double('Postman', subscription: subscription) }
+  let(:subscription) { instance_double('Postman::Channel', 'subscription') }
   let(:retry_attempts) { 0 }
 
   describe '#process' do
     before do
-      allow(main_exchange).to receive(:ack)
-      allow(main_exchange).to receive(:nack)
+      allow(subscription).to receive(:ack)
+      allow(subscription).to receive(:nack)
     end
 
     let(:record_class) { instance_double('DummyActiveRecord') }
@@ -28,7 +28,7 @@ RSpec.describe Warren::Subscriber::RailsBase do
 
     it 'acknowledges the message' do
       subscriber._process_
-      expect(main_exchange).to have_received(:ack).with('delivery_tag')
+      expect(subscription).to have_received(:ack).with('delivery_tag')
     end
 
     # This isn't ideal, but I need time for the architecture to settle down
@@ -41,7 +41,7 @@ RSpec.describe Warren::Subscriber::RailsBase do
       allow(subscriber).to receive(:process).and_raise(NameError,
                                                        "undefined local variable or method `bad' for main:Object'")
       subscriber._process_
-      expect(main_exchange).to have_received(:nack).with('delivery_tag')
+      expect(subscription).to have_received(:nack).with('delivery_tag')
     end
 
     # Awaiting split for AR message base
@@ -50,7 +50,7 @@ RSpec.describe Warren::Subscriber::RailsBase do
                                                        'Mysql2::Error: MySQL server has gone away: SELECT 1')
       allow(postman).to receive(:pause!)
       subscriber._process_
-      expect(main_exchange).to have_received(:nack).with('delivery_tag', false, true)
+      expect(subscription).to have_received(:nack).with('delivery_tag', false, true)
     end
 
     it 'pauses the postman if a database connection exception is raised' do

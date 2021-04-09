@@ -17,7 +17,7 @@ module Warren
       # Essentially syntax is:
       # def_delegators <target>, *<methods_to_delegate>
       def_delegators :logger, :warn, :info, :error, :debug
-      def_delegators :postman, :main_exchange
+      def_delegators :postman, :subscription
 
       def logger
         @logger ||= if defined?(Rails)
@@ -68,7 +68,7 @@ module Warren
       end
 
       def ack
-        main_exchange.ack(delivery_tag)
+        subscription.ack(delivery_tag)
       end
 
       # Reject the message and re-queue ready for
@@ -76,7 +76,7 @@ module Warren
       def requeue(exception)
         warn "Re-queue: #{payload}"
         warn "Re-queue Exception: #{exception.message}"
-        main_exchange.nack(delivery_tag, false, true)
+        subscription.nack(delivery_tag, false, true)
         warn 'Re-queue nacked'
       end
 
@@ -92,7 +92,7 @@ module Warren
       def dead_letter(exception)
         error "Dead-letter: #{payload}"
         error "Dead-letter Exception: #{exception.message}"
-        main_exchange.nack(delivery_tag)
+        subscription.nack(delivery_tag)
         error 'Dead-letter nacked'
       end
     end

@@ -8,18 +8,18 @@ require 'warren/subscriber/base'
 RSpec.describe Warren::Subscriber::Base do
   subject(:subscriber) do
     delivery_info = instance_double('Bunny::DeliveryInfo', delivery_tag: 'delivery_tag', routing_key: 'test.key')
-    postman = instance_double('Postman', main_exchange: main_exchange)
+    postman = instance_double('Postman', subscription: subscription)
     headers = retry_attempts.zero? ? nil : { 'attempts' => retry_attempts }
     metadata = instance_double('Bunny::MessageProperties', headers: headers)
     described_class.new(postman, delivery_info, metadata, payload)
   end
 
   before do
-    allow(main_exchange).to receive(:ack)
-    allow(main_exchange).to receive(:nack)
+    allow(subscription).to receive(:ack)
+    allow(subscription).to receive(:nack)
   end
 
-  let(:main_exchange) { instance_double('Postman::Channel', 'main_exchange') }
+  let(:subscription) { instance_double('Postman::Channel', 'subscription') }
   let(:retry_attempts) { 0 }
 
   describe '#process' do
@@ -28,7 +28,7 @@ RSpec.describe Warren::Subscriber::Base do
 
     it 'acknowledges the message' do
       subscriber._process_
-      expect(main_exchange).to have_received(:ack).with('delivery_tag')
+      expect(subscription).to have_received(:ack).with('delivery_tag')
     end
 
     # This isn't ideal, but I need time for the architecture to settle down
@@ -41,7 +41,7 @@ RSpec.describe Warren::Subscriber::Base do
       allow(subscriber).to receive(:process).and_raise(NameError,
                                                        "undefined local variable or method `bad' for main:Object'")
       subscriber._process_
-      expect(main_exchange).to have_received(:nack).with('delivery_tag')
+      expect(subscription).to have_received(:nack).with('delivery_tag')
     end
     # rubocop:enable RSpec/SubjectStub
   end
