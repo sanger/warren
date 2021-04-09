@@ -3,7 +3,7 @@
 require 'forwardable'
 require 'bunny'
 require 'warren'
-require 'warren/postman/state_machine'
+require 'warren/helpers/state_machine'
 require 'warren/postman/channel'
 require 'warren/subscriber/base'
 
@@ -11,7 +11,7 @@ require 'warren/subscriber/base'
 # and manages state and reconnection.
 class Postman
   extend Forwardable
-  extend StateMachine::Helper
+  extend Warren::Helpers::StateMachine
   # Maximum wait time between database retries: 5 minutes
   MAX_RECONNECT_DELAY = 60 * 5
 
