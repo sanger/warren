@@ -12,12 +12,16 @@ require 'warren/railtie' if defined?(Rails::Railtie)
 # Module Warren provides connection pooling for RabbitMQ Connections
 #
 module Warren
+  # Environmental variables
+  WARREN_TYPE = 'WARREN_TYPE'
+
   def self.construct(type:, config: {})
-    case type
+    warren_type = ENV.fetch(WARREN_TYPE, type)
+    case warren_type
     when 'test' then Warren::Handler::Test.new
     when 'log' then Warren::Handler::Log.new(logger: config.fetch(:logger) { Rails.logger })
     when 'broadcast' then Warren::Handler::Broadcast.new(**config)
-    else raise StandardError, "Unknown type warren: #{type}"
+    else raise StandardError, "Unknown type warren: #{warren_type}"
     end
   end
 

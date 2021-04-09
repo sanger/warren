@@ -7,7 +7,11 @@ module Warren
       # We keep the template as plain text as it allows us to add comments
       TEMPLATE = <<~TEMPLATE
         # By default the development environment just logs the message and
-        # payload.
+        # payload. If you wish to enable broadcasting in development mode,
+        # the easiest way to do so is to set the ENV WARREN_TYPE.
+        # For example
+        # `WARREN_TYPE=broadcast bundle exec rails s`
+        # This will override the setting in warren.yml
         development:
           type: log
           # Log mode does not actually use this configuration, but
