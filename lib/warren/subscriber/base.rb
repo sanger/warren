@@ -27,16 +27,12 @@ module Warren
       end
 
       def _process_
-        handle_exceptions { process }
+        process
         ack unless @acknowledged
       end
 
       def process
         true
-      end
-
-      def handle_exceptions
-        yield
       end
 
       # Reject the message and re-queue ready for
