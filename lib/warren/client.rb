@@ -7,6 +7,10 @@ module Warren
   # configuration. Usually generated via the {Warren::App::Consumer} and
   # triggered via the command line `warren consumer start`
   class Client
+    # The interrupt updates the client state to 'stopping' and the control loop
+    # handles the actual shutdown. This is as there are limitations on what may
+    # take place during an interrupt. This constant controls the frequency at
+    # while the control loop polls its state.
     SECONDS_TO_SLEEP = 3
 
     extend Warren::Helpers::StateMachine
