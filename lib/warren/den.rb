@@ -6,6 +6,8 @@ require 'warren/subscription'
 
 module Warren
   # A Den is in charge of creating a Fox from a consumer configuration
+  # Currently its pretty simple, but in future will also handle registration of
+  # delay and dead-letter queues/exchanges.
   class Den
     #
     # Create a {Warren::Fox} work pool.
