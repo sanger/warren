@@ -42,6 +42,25 @@ module Warren
           raise Warren::Exceptions::TemporaryIssue, e.message
         end
       end
+
+      def env
+        Rails.env
+      end
+
+      def logger
+        Rails.logger
+      end
+
+      def load_application
+        $stdout.puts 'Loading application...'
+        require './config/environment'
+        Warren.load_configuration
+        $stdout.puts 'Loaded!'
+      rescue LoadError
+        # Need to work out an elegant way to handle non-rails
+        # apps
+        $stdout.puts 'Could not auto-load application'
+      end
     end
   end
 end

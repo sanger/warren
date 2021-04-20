@@ -12,14 +12,12 @@ module Warren
     # @param app_name [String] The name of the application. Corresponds to the
     #                          subscriptions config in `config/warren.yml`
     # @param config [Warren::Config::Consumers] A configuration object, loaded from `config/warren.yml` by default
-    # @param logger [Logger] A logger or Logger compatible object
-    # @param env [String] An identifier for the environment
-    def initialize(app_name, config, logger:, env:)
+    # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
+    def initialize(app_name, config, adaptor:)
       @app_name = app_name
       @config = config
       @fox = nil
-      @logger = logger
-      @env = env
+      @adaptor = adaptor
     end
 
     def fox
@@ -50,11 +48,11 @@ module Warren
       # a per-queue basis. Currently that just means one worker per consumer.
       channel = Warren.handler.new_channel
       subscription = Warren::Subscription.new(channel: channel, config: queue_config)
-      Warren::Fox.new(name: @app_name, subscription: subscription, logger: @logger, env: @env)
+      Warren::Fox.new(name: @app_name, subscription: subscription, adaptor: @adaptor)
     end
 
     def queue_config
-      p @config.consumer(@app_name).fetch('queue')
+      @config.consumer(@app_name).fetch('queue')
     end
   end
 end

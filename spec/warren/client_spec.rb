@@ -25,7 +25,7 @@ RSpec.describe Warren::Client do
 
       before do
         allow(Warren::Den).to receive(:new)
-          .with('consumer_a', config, logger: be_an_instance_of(Logger), env: 'test')
+          .with('consumer_a', config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
           .and_return(instance_double(Warren::Den, fox: fox))
       end
 
@@ -62,10 +62,10 @@ RSpec.describe Warren::Client do
       before do
         allow(config).to receive(:all_consumers).and_return(%w[consumer_a consumer_b])
         allow(Warren::Den).to receive(:new)
-          .with('consumer_a', config, logger: be_an_instance_of(Logger), env: 'test')
+          .with('consumer_a', config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
           .and_return(instance_double(Warren::Den, fox: fox[0]))
         allow(Warren::Den).to receive(:new)
-          .with('consumer_b', config, logger: be_an_instance_of(Logger), env: 'test')
+          .with('consumer_b', config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
           .and_return(instance_double(Warren::Den, fox: fox[1]))
       end
 
@@ -98,7 +98,8 @@ RSpec.describe Warren::Client do
 
       before do
         allow(Warren::Den).to receive(:new)
-          .with('consumer_a', config, logger: be_an_instance_of(Logger), env: 'test')
+          .with('consumer_a', config,
+                adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
           .and_return(instance_double(Warren::Den, fox: fox))
         allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
       end

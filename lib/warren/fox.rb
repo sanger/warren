@@ -28,14 +28,14 @@ module Warren
     #
     # @param name [String] The name of the consumer
     # @param subscription [Warren::Subscription] Describes the queue to subscribe to
-    # @param logger [Logger] A logger, or Logger compatible interface
     # @param env [String] A string identifying the environment
+    # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
     #
-    def initialize(name:, subscription:, logger:, env:, adaptor: Warren::FrameworkAdaptor::RailsAdaptor.new)
-      @consumer_tag = "#{env}_#{name}_#{Process.pid}"
+    def initialize(name:, subscription:, adaptor:)
+      @consumer_tag = "#{adaptor.env}_#{name}_#{Process.pid}"
       @state = :initialized
       @subscription = subscription
-      @logger = Warren::LogTagger.new(logger: logger, tag: "#{FOX} #{@consumer_tag}")
+      @logger = Warren::LogTagger.new(logger: adaptor.logger, tag: "#{FOX} #{@consumer_tag}")
       @adaptor = adaptor
     end
 

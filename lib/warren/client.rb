@@ -14,6 +14,7 @@ module Warren
     SECONDS_TO_SLEEP = 3
 
     extend Warren::Helpers::StateMachine
+    extend Forwardable
 
     states :stopping, :stopped, :paused, :starting, :started, :running
 
@@ -26,18 +27,16 @@ module Warren
     # @param config [Warren::Config::Consumers] A consumer configuration object
     # @param consumers [Array<String>] The names of the consumers to spawn, or
     #                                  nil to spawn them all
-    # @param logger [Logger] Optional logger object. Will default to Rails.logger
-    #                        if available, or a new Logger object otherwise
     #
-    def initialize(config, consumers: nil, logger: nil)
+    def initialize(config, consumers: nil, adaptor: Warren::FrameworkAdaptor::RailsAdaptor.new)
       @config = config
       @consumers = consumers || @config.all_consumers
-      @logger = logger
+      @adaptor = adaptor
     end
 
     def run
       starting!
-      load_application
+      @adaptor.load_application
       connect_to_rabbit_mq
       trap_signals
       foxes.each(&:run!)
@@ -62,10 +61,6 @@ module Warren
       Warren.handler.connect
     end
 
-    def env
-      defined?(Rails) ? Rails.env : ENV['RACK_ENV']
-    end
-
     # Capture the term signal and set the state to stopping.
     # We can't directly cancel the consumer from here as Bunny
     # uses Mutex locking while checking the state. Ruby forbids this
@@ -78,26 +73,10 @@ module Warren
       Signal.trap('INT') { manual_stop! }
     end
 
-    def logger
-      @logger ||= defined?(Rails) ? Rails.logger : Logger.new($stdout)
-    end
-
     def foxes
       @foxes ||= @consumers.map do |consumer|
-        Den.new(consumer, @config, logger: logger, env: env).fox
+        Den.new(consumer, @config, adaptor: @adaptor).fox
       end
-    end
-
-    # We load our application
-    def load_application
-      $stdout.puts 'Loading application...'
-      require './config/environment'
-      Warren.load_configuration
-      $stdout.puts 'Loaded!'
-    rescue LoadError
-      # Need to work out an elegant way to handle non-rails
-      # apps
-      $stdout.puts 'Could not auto-load application'
     end
 
     # Called in an interrupt. (Ctrl-C)

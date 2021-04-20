@@ -8,13 +8,12 @@ require 'warren/subscription'
 
 RSpec.describe Warren::Fox do
   subject(:fox) do
-    logger = instance_spy(Logger)
-    described_class.new(name: 'fox', subscription: subscription, logger: logger, env: 'test', adaptor: adaptor)
+    described_class.new(name: 'fox', subscription: subscription, adaptor: adaptor)
   end
 
   let(:subscription) { instance_spy(Warren::Subscription) }
   let(:consumer) { instance_spy(Bunny::Consumer) }
-  let(:adaptor) { instance_spy(Warren::FrameworkAdaptor::RailsAdaptor) }
+  let(:adaptor) { instance_spy(Warren::FrameworkAdaptor::RailsAdaptor, logger: instance_spy(Logger)) }
 
   before do
     allow(subscription).to receive(:activate!)
