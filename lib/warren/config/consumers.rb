@@ -17,7 +17,7 @@ module Warren
       end
 
       #
-      # Save the configuration to {path}
+      # Save the configuration to `@path`
       #
       # @return [Void]
       #
@@ -40,6 +40,15 @@ module Warren
 
       def consumer(name)
         @config.fetch(name) { raise StandardError, "Unknown consumer '#{name}'" }
+      end
+
+      #
+      # Returns a list of all registered consumers
+      #
+      # @return [Array<string>] An array of registered consumer names
+      #
+      def all_consumers
+        @config.keys
       end
 
       #

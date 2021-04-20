@@ -6,6 +6,20 @@ require 'yaml'
 require 'warren/app/consumer_add'
 
 RSpec.describe Warren::App::ConsumerAdd do
+  shared_examples 'a consumer addition' do
+    it 'updates the configuration' do
+      expect(consumer_config).to have_received(:add_consumer)
+        .with('consumer_name', desc: 'my consumer', queue: 'queue_name', bindings: [{
+                'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
+                'options' => { routing_key: 'c' }
+              }])
+    end
+
+    it 'saves the configuration' do
+      expect(consumer_config).to have_received(:save)
+    end
+  end
+
   describe '::invoke' do
     let(:shell) { instance_double(Thor::Shell::Basic) }
 
@@ -20,20 +34,6 @@ RSpec.describe Warren::App::ConsumerAdd do
                                                          .and_return(false)
       allow(consumer_config).to receive(:add_consumer)
       allow(consumer_config).to receive(:save)
-    end
-
-    shared_examples 'a consumer addition' do
-      it 'updates the configuration' do
-        expect(consumer_config).to have_received(:add_consumer)
-          .with('consumer_name', desc: 'my consumer', queue: 'queue_name', bindings: [{
-                  'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
-                  'options' => { routing_key: 'c' }
-                }])
-      end
-
-      it 'saves the configuration' do
-        expect(consumer_config).to have_received(:save)
-      end
     end
 
     context 'with a clashing consumer name' do

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
 require 'warren/config/consumers'
 
 RSpec.describe Warren::Config::Consumers do

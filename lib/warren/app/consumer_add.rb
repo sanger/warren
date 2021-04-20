@@ -8,8 +8,8 @@ module Warren
     # Handles the initial creation of the configuration object
     class ConsumerAdd
       #
-      # Add a consumer to the configuration file located at {#path}
-      # Will prompt the user for input on the {#shell} if information not
+      # Add a consumer to the configuration file located at `options.path`
+      # Will prompt the user for input on the `shell` if information not
       # provided upfront
       #
       # @param shell [Thor::Shell::Basic] Thor shell instance for feedback
@@ -47,8 +47,8 @@ module Warren
       end
 
       #
-      # Create a new configuration yaml file at {#path} using sensible defaults
-      # and the provided {#exchange}. If {#exchange} is nil, prompts the user
+      # Create a new configuration yaml file at `@path` using sensible defaults
+      # and the provided exchange. If exchange is nil, prompts the user
       #
       # @return [Void]
       #

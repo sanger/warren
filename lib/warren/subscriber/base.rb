@@ -10,41 +10,25 @@ module Warren
     class Base
       extend Forwardable
 
-      attr_reader :delivery_info, :metadata, :payload, :postman
+      attr_reader :delivery_info, :metadata, :payload, :fox
 
       # We don't add an active-support dependency, so instead use the plain-ruby
       # delegators (Supplied by Forwardable)
       # Essentially syntax is:
       # def_delegators <target>, *<methods_to_delegate>
-      def_delegators :logger, :warn, :info, :error, :debug
-      def_delegators :postman, :subscription
+      def_delegators :fox, :subscription, :warn, :info, :error, :debug
 
-      def logger
-        @logger ||= if defined?(Rails)
-                      Rails.logger
-                    else
-                      Logger.new($stdout)
-                    end
-      end
-
-      def initialize(postman, delivery_info, metadata, payload)
-        @postman = postman
+      def initialize(fox, delivery_info, metadata, payload)
+        @fox = fox
         @delivery_info = delivery_info
         @metadata = metadata
         @payload = payload
+        @acknowledged = false
       end
 
       def _process_
-        debug 'Started message process'
-        debug payload
         handle_exceptions { process }
-        ack
-      rescue Warren::Exceptions::TemporaryIssue => e
-        temporary_issue(e)
-      rescue StandardError => e
-        dead_letter(e)
-      ensure
-        debug 'Finished message process'
+        ack unless @acknowledged
       end
 
       def process
@@ -53,6 +37,35 @@ module Warren
 
       def handle_exceptions
         yield
+      end
+
+      # Reject the message and re-queue ready for
+      # immediate reprocessing.
+      def requeue(exception)
+        warn "Re-queue: #{payload}"
+        warn "Re-queue Exception: #{exception.message}"
+        raise_if_acknowledged
+        subscription.nack(delivery_tag, false, true)
+        @acknowledged = true
+        warn 'Re-queue nacked'
+      end
+
+      # def temporary_issue(exception)
+      #   # We have some temporary database issues. Requeue the message and pause
+      #   # until the issue is resolved.
+      #   requeue(exception)
+      #   fox.pause!
+      # end
+
+      # Reject the message without re-queuing
+      # Will end up getting dead-lettered
+      def dead_letter(exception)
+        error "Dead-letter: #{payload}"
+        error "Dead-letter Exception: #{exception.message}"
+        raise_if_acknowledged
+        subscription.nack(delivery_tag)
+        @acknowledged = true
+        error 'Dead-letter nacked'
       end
 
       private
@@ -68,32 +81,16 @@ module Warren
       end
 
       def ack
+        raise_if_acknowledged
         subscription.ack(delivery_tag)
+        @acknowledged = true
       end
 
-      # Reject the message and re-queue ready for
-      # immediate reprocessing.
-      def requeue(exception)
-        warn "Re-queue: #{payload}"
-        warn "Re-queue Exception: #{exception.message}"
-        subscription.nack(delivery_tag, false, true)
-        warn 'Re-queue nacked'
-      end
+      def raise_if_acknowledged
+        return unless @acknowledged
 
-      def temporary_issue(exception)
-        # We have some temporary database issues. Requeue the message and pause
-        # until the issue is resolved.
-        requeue(exception)
-        postman.pause!
-      end
-
-      # Reject the message without re-queuing
-      # Will end up getting dead-lettered
-      def dead_letter(exception)
-        error "Dead-letter: #{payload}"
-        error "Dead-letter Exception: #{exception.message}"
-        subscription.nack(delivery_tag)
-        error 'Dead-letter nacked'
+        error "Multiple acks/nacks for: #{payload}"
+        raise MultipleAcknowledgements
       end
     end
   end

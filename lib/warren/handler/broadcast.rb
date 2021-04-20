@@ -2,6 +2,7 @@
 
 require 'bunny'
 require 'forwardable'
+require 'connection_pool'
 
 module Warren
   module Handler
@@ -102,6 +103,11 @@ module Warren
         self
       end
 
+      def new_channel
+        Channel.new(session.create_channel(nil, 1), exchange: @exchange_name,
+                                                    routing_key_template: @routing_key_template)
+      end
+
       private
 
       def session
@@ -110,8 +116,7 @@ module Warren
 
       def connection_pool
         @connection_pool ||= start_session && ConnectionPool.new(size: @pool_size, timeout: 5) do
-          Channel.new(session.create_channel, exchange: @exchange_name,
-                                              routing_key_template: @routing_key_template)
+          new_channel
         end
       end
 

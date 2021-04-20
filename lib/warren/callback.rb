@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'message/full'
-require 'connection_pool'
-
 require_relative 'callback/broadcast_with_warren'
 require_relative 'callback/broadcast_associated_with_warren'
 #

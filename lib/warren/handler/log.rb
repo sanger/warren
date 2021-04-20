@@ -72,6 +72,10 @@ module Warren
 
       def disconnect; end
 
+      def new_channel
+        Channel.new(@logger, routing_key_template: @routing_key_template)
+      end
+
       #
       # Yields a Warren::Log::Channel
       #
@@ -80,7 +84,7 @@ module Warren
       #
       # @yieldreturn [Warren::Log::Channel] A rabbitMQ channel that logs messaged to the test warren
       def with_channel
-        yield Channel.new(@logger, routing_key_template: @routing_key_template)
+        yield new_channel
       end
 
       #

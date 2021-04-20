@@ -3,6 +3,7 @@
 require 'spec_helper'
 require 'warren/app/config'
 require 'yaml'
+require 'thor'
 
 RSpec.describe Warren::App::Config do
   describe '::invoke' do

@@ -13,3 +13,6 @@ gem 'rubocop-rake'
 gem 'rubocop-rspec'
 gem 'simplecov'
 gem 'yard'
+
+# Used to provide instance_doubles for more robust testing
+gem 'activerecord', '~>5.2.0', require: false

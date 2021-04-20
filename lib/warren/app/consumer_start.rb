@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'exchange_config'
-require 'warren/consumer'
+require 'warren/client'
 
 module Warren
   module App
@@ -18,7 +18,7 @@ module Warren
       end
 
       def invoke
-        AmqpClient.new(@config, consumers: @consumers).run
+        Warren::Client.new(@config, consumers: @consumers).run
       end
     end
   end

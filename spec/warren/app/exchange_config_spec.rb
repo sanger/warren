@@ -6,6 +6,53 @@ require 'thor'
 require 'warren/app/exchange_config'
 
 RSpec.describe Warren::App::ExchangeConfig do
+  shared_examples 'a direct exchange' do
+    let(:exchange_config) do
+      {
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
+        'options' => { routing_key: 'key_a' }
+      }
+    end
+
+    it { is_expected.to eq [exchange_config] }
+  end
+
+  shared_examples 'a fanout exchange' do
+    let(:exchange_config) do
+      {
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout' } },
+        'options' => {}
+      }
+    end
+
+    it { is_expected.to eq [exchange_config] }
+  end
+
+  shared_examples 'a topic exchange' do
+    let(:exchange_config) do
+      [{
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
+        'options' => { routing_key: 'key_a' }
+      }, {
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
+        'options' => { routing_key: 'key_b' }
+      }]
+    end
+
+    it { is_expected.to eq exchange_config }
+  end
+
+  shared_examples 'a header exchange' do
+    let(:exchange_config) do
+      {
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header' } },
+        'options' => { arguments: {} }
+      }
+    end
+
+    it { is_expected.to eq [exchange_config] }
+  end
+
   describe '::ask' do
     let(:subject) { described_class.ask(shell) }
     let(:shell) { instance_double(Thor::Shell::Basic) }
@@ -24,14 +71,8 @@ RSpec.describe Warren::App::ExchangeConfig do
       end
 
       let(:choice) { 'd' }
-      let(:exchange_config) do
-        {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
-          'options' => { routing_key: 'key_a' }
-        }
-      end
 
-      it { is_expected.to eq [exchange_config] }
+      it_behaves_like 'a direct exchange'
     end
 
     context 'when the user chooses "fanout"' do
@@ -40,14 +81,8 @@ RSpec.describe Warren::App::ExchangeConfig do
       end
 
       let(:choice) { 'f' }
-      let(:exchange_config) do
-        {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout' } },
-          'options' => {}
-        }
-      end
 
-      it { is_expected.to eq [exchange_config] }
+      it_behaves_like 'a fanout exchange'
     end
 
     context 'when the user chooses "topic"' do
@@ -58,17 +93,8 @@ RSpec.describe Warren::App::ExchangeConfig do
       end
 
       let(:choice) { 't' }
-      let(:exchange_config) do
-        [{
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
-          'options' => { routing_key: 'key_a' }
-        }, {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
-          'options' => { routing_key: 'key_b' }
-        }]
-      end
 
-      it { is_expected.to eq exchange_config }
+      it_behaves_like 'a topic exchange'
     end
 
     context 'when the user chooses "header"' do
@@ -78,14 +104,8 @@ RSpec.describe Warren::App::ExchangeConfig do
       end
 
       let(:choice) { 'h' }
-      let(:exchange_config) do
-        {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header' } },
-          'options' => { arguments: {} }
-        }
-      end
 
-      it { is_expected.to eq [exchange_config] }
+      it_behaves_like 'a header exchange'
     end
   end
 
@@ -95,41 +115,20 @@ RSpec.describe Warren::App::ExchangeConfig do
 
     context 'when the user chooses "direct"' do
       let(:choice) { 'direct:exchange_name:key_a' }
-      let(:exchange_config) do
-        {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
-          'options' => { routing_key: 'key_a' }
-        }
-      end
 
-      it { is_expected.to eq [exchange_config] }
+      it_behaves_like 'a direct exchange'
     end
 
     context 'when the user chooses "fanout"' do
       let(:choice) { 'fanout:exchange_name' }
-      let(:exchange_config) do
-        {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout' } },
-          'options' => {}
-        }
-      end
 
-      it { is_expected.to eq [exchange_config] }
+      it_behaves_like 'a fanout exchange'
     end
 
     context 'when the user chooses "topic"' do
       let(:choice) { 'topic:exchange_name:key_a,key_b' }
-      let(:exchange_config) do
-        [{
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
-          'options' => { routing_key: 'key_a' }
-        }, {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
-          'options' => { routing_key: 'key_b' }
-        }]
-      end
 
-      it { is_expected.to eq exchange_config }
+      it_behaves_like 'a topic exchange'
     end
 
     context 'when the user chooses "header"' do
@@ -138,14 +137,8 @@ RSpec.describe Warren::App::ExchangeConfig do
       end
 
       let(:choice) { 'header:exchange_name' }
-      let(:exchange_config) do
-        {
-          'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header' } },
-          'options' => { arguments: {} }
-        }
-      end
 
-      it { is_expected.to eq [exchange_config] }
+      it_behaves_like 'a header exchange'
     end
 
     context 'when the user chooses an invalid option' do

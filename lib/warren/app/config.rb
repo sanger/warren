@@ -41,6 +41,14 @@ module Warren
         new(shell, path: path, exchange: exchange).invoke
       end
 
+      #
+      # Generates a new warren.yml file at {#path}. Usually invoked via the
+      # `warren config` cli command
+      #
+      # @param shell [Thor::Shell::Basic] Thor shell instance for user interaction
+      # @param path [String] The path to the warren.yml file.
+      # @param exchange [String] The exchange to connect to
+      #
       def initialize(shell, path:, exchange: nil)
         @shell = shell
         @path = path
@@ -66,6 +74,8 @@ module Warren
 
       # The path to the config file
       attr_reader :path
+      # The exchange to connect to
+      attr_reader :exchange
 
       def payload
         format(TEMPLATE, exchange: @exchange, vhost: '/')

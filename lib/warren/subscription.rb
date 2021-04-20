@@ -7,15 +7,34 @@ module Warren
 
     attr_reader :channel
 
+    #
+    # Great a new subscription. Handles queue creation, binding and attaching
+    # consumers to the queues
+    #
+    # @param channel [<Type>] <description>
+    # @param config [<Type>] <description>
+    #
     def initialize(channel:, config:)
       @channel = channel
-      @queue_name = config.dig('queue', 'name')
-      @queue_options = config.dig('queue', 'options')
-      @bindings = config.dig('queue', 'bindings')
+      @queue_name = config.fetch('name')
+      @queue_options = config.fetch('options')
+      @bindings = config.fetch('bindings')
     end
 
     def_delegators :channel, :nack, :ack
 
+    #
+    # Subscribes to the given queue
+    #
+    # @param consumer_tag [String] Identifier for the consumer
+    # @param &block [<Type>] <description>
+    #
+    # @yieldparam [Bunny::DeliveryInfo] delivery_info Metadata about the delivery
+    # @yieldparam [Bunny::MessageProperties] properties
+    # @yieldparam [String] payload the contents of the message
+    #
+    # @return [Bunny::Consumer] The bunny consumer object
+    #
     def subscribe(consumer_tag, &block)
       channel.prefetch(10)
       queue.subscribe(manual_ack: true, block: false, consumer_tag: consumer_tag, durable: true, &block)
@@ -27,11 +46,11 @@ module Warren
       establish_bindings!
     end
 
+    private
+
     def add_binding(exchange, options)
       queue.bind(exchange, options)
     end
-
-    private
 
     def exchange(config)
       channel.exchange(*config.values_at('name', 'options'))

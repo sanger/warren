@@ -3,6 +3,8 @@
 require 'simplecov'
 SimpleCov.start
 
+ENV['RACK_ENV'] ||= 'test'
+
 require 'bundler/setup'
 require 'warren'
 require 'pry'
