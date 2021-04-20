@@ -36,7 +36,7 @@ module Warren
       load_application
       connect_to_rabbit_mq
       trap_signals
-      foxes.map(&:run!)
+      foxes.each(&:run!)
       started!
       control_loop while alive?
     end
