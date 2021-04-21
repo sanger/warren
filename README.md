@@ -22,9 +22,71 @@ Or install it yourself as:
 
 ## Usage
 
+### Basic setup
+
 If using with a Rails app, you can simply run `bundle exec warren config` to
 help generate a warren config file. Warren will automatically be initialize
 on Rails start-up.
+
+### Handler types
+
+In development mode, warren is usually configured to log to the console only. If
+you wish to enable broadcast mode, the easiest way is via an environmental
+variable, WARREN_TYPE.
+
+  $ WARREN_TYPE=broadcast bundle exec rails s
+
+### Broadcasting a message
+
+To broadcast a message, simply push the message onto the message handler
+
+```ruby
+    Warren.handler << message
+```
+
+Message should be an object that responds to routing_key and payload. The handler
+will automatically prefix the routing key with the 'routing_key_prefix' configured
+in the warren.yml file. By default this is usually the name of your environment.
+
+If you are sending out multiple messages, you can check out a channel from the
+connection pool, and use that instead.
+
+```ruby
+    Warren.handler.with_channel do |channel|
+        channel << message_a
+        channel << message_b
+    end
+```
+### Setting up a consumer
+
+A command line interface exists to assist with setting up consumers. It be be
+invoked with:
+
+  $ bundle exec warren consumer add
+
+This will guide you through configuration, and template out a subscriber class.
+Subscribers receive the message payload, and metadata information and process
+them in their #process method.
+
+For more information about optional command line arguments you can supply to
+the cli use:
+
+  $  bundle exec warren consumer add --help
+
+### Running consumers
+
+To run all configure consumers use:
+
+  $ bundle exec warren consumer start
+
+You can also run only a subset of consumers:
+
+  $ bundle exec warren consumer start --consumers=consumer_name other_consumer
+
+If you are testing in development, don't forget to set the WARREN_TYPE
+environmental variable if you want to pull messages off an actual queue.
+
+  $ WARREN_TYPE=broadcast bundle exec warren consumer start
 
 ## Testing
 
