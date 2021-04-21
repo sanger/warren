@@ -12,6 +12,10 @@ module Warren
     # - Start consumers
     # @see http://whatisthor.com
     class Consumer < Thor
+      include Thor::Actions
+
+      source_root("#{File.dirname(__FILE__)}/templates")
+
       # Ensure we exit with an error in the event of failure
       def self.exit_on_failure?
         true
@@ -30,7 +34,7 @@ module Warren
                     desc: 'The path to the consumer configuration file to generate'
       def add(name = nil)
         say 'Adding a consumer'
-        Warren::App::ConsumerAdd.invoke(shell, name, options)
+        Warren::App::ConsumerAdd.invoke(self, name, options)
       end
 
       desc 'start', 'start registered consumers'
@@ -42,7 +46,7 @@ module Warren
                          banner: 'consumer_name other_consumer'
       def start
         say 'Starting consumers'
-        Warren::App::ConsumerStart.invoke(shell, options)
+        Warren::App::ConsumerStart.invoke(self, options)
       end
     end
   end

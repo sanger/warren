@@ -30,13 +30,15 @@ RSpec.describe Warren::Client do
       end
 
       it 'runs the fox' do
-        allow(client).to receive(:alive?).and_return(false)
+        allow(client).to receive(:alive?).and_return(true, false)
+        allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
         client.run
         expect(fox).to have_received(:run!)
       end
 
       it 'initializes the handler' do
-        allow(client).to receive(:alive?).and_return(false)
+        allow(client).to receive(:alive?).and_return(true, false)
+        allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
         client.run
         expect(handler).to have_received(:connect)
       end

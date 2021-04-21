@@ -7,6 +7,10 @@ module Warren
   module App
     # Handles the initial creation of the configuration object
     class ConsumerAdd
+      SUBSCRIBER_NAMESPACE = 'Warren::Subscriber::'
+
+      attr_reader :name, :desc, :queue
+
       #
       # Add a consumer to the configuration file located at `options.path`
       # Will prompt the user for input on the `shell` if information not
@@ -57,9 +61,16 @@ module Warren
         # might have an issue early.
         gather_facts
         write_configuration
+        write_subscriber
       end
 
       private
+
+      def subscribed_class
+        class_name = name.split(/[\s\-_]/).map(&:capitalize).join
+
+        "#{SUBSCRIBER_NAMESPACE}#{class_name}"
+      end
 
       def check_name
         while @config.consumer_exist?(@name)
@@ -95,8 +106,16 @@ module Warren
       end
 
       def write_configuration
-        @config.add_consumer(@name, desc: @desc, queue: @queue, bindings: @bindings)
+        @config.add_consumer(@name, desc: @desc, queue: @queue, bindings: @bindings, subscribed_class: subscribed_class)
         @config.save
+      end
+
+      def write_subscriber
+        @shell.template('subscriber.tt', consumer_path, context: binding)
+      end
+
+      def consumer_path
+        "app/warren/subscribers/#{@name.tr(' -', '_')}.rb"
       end
     end
   end

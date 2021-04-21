@@ -8,10 +8,10 @@ require 'warren/subscriber/base'
 RSpec.describe Warren::Subscriber::Base do
   subject(:subscriber) do
     delivery_info = instance_double('Bunny::DeliveryInfo', delivery_tag: 'delivery_tag', routing_key: 'test.key')
-    fox = instance_double(Warren::Fox, subscription: subscription)
+    fox = instance_spy(Warren::Fox, subscription: subscription, error: nil)
     headers = retry_attempts.zero? ? nil : { 'attempts' => retry_attempts }
-    metadata = instance_double('Bunny::MessageProperties', headers: headers)
-    described_class.new(fox, delivery_info, metadata, payload)
+    properties = instance_double('Bunny::MessageProperties', headers: headers)
+    described_class.new(fox, delivery_info, properties, payload)
   end
 
   before do
@@ -19,7 +19,7 @@ RSpec.describe Warren::Subscriber::Base do
     allow(subscription).to receive(:nack)
   end
 
-  let(:subscription) { instance_double(Warren::Subscription, 'subscription') }
+  let(:subscription) { instance_spy(Warren::Subscription, 'subscription') }
   let(:retry_attempts) { 0 }
 
   describe '#process' do
@@ -29,6 +29,12 @@ RSpec.describe Warren::Subscriber::Base do
     it 'acknowledges the message' do
       subscriber._process_
       expect(subscription).to have_received(:ack).with('delivery_tag')
+    end
+
+    it 'raises Warren::MultipleAcknowledgements if both acked and nacked' do
+      subscriber.dead_letter(StandardError.new('I do not like it'))
+
+      expect { subscriber.send(:ack) }.to raise_error(Warren::Exceptions::MultipleAcknowledgements)
     end
   end
 end

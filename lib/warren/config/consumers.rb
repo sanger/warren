@@ -61,14 +61,15 @@ module Warren
       #
       # @return [Hash] The consumer configuration hash
       #
-      def add_consumer(name, desc:, queue:, bindings:)
+      def add_consumer(name, desc:, queue:, bindings:, subscribed_class:)
         @config[name] = {
           'desc' => desc,
           'queue' => {
             'name' => queue,
             'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => "#{name}.dead-letters" } },
             'bindings' => bindings
-          }
+          },
+          'subscribed_class' => subscribed_class
         }
       end
 

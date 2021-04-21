@@ -18,7 +18,8 @@ RSpec.describe Warren::Den do
               'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct', durable: true } },
               'options' => { routing_key: 'c' }
             }
-          ]
+          ],
+          'subscribed_class' => 'Warren::Subscriber::Base'
         }
       )
       allow(Warren).to receive(:handler).and_return(instance_spy(Warren::Handler::Broadcast, new_channel: true))

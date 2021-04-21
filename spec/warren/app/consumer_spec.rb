@@ -6,7 +6,7 @@ require 'warren/app/consumer_add'
 
 RSpec.describe Warren::App::Consumer do
   let(:default_path) { 'config/warren_consumers.yml' }
-  let(:a_thor_shell) { a_kind_of(Thor::Shell::Basic) }
+  let(:a_thor_shell) { a_kind_of(described_class) }
 
   describe '#add' do
     let(:action) { 'add' }

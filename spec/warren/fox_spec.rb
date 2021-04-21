@@ -11,7 +11,7 @@ RSpec.describe Warren::Fox do
     described_class.new(name: 'fox', subscription: subscription, adaptor: adaptor)
   end
 
-  let(:subscription) { instance_spy(Warren::Subscription) }
+  let(:subscription) { instance_spy(Warren::Subscription, subscribed_class: Warren::Subscriber::Base) }
   let(:consumer) { instance_spy(Bunny::Consumer) }
   let(:adaptor) { instance_spy(Warren::FrameworkAdaptor::RailsAdaptor, logger: instance_spy(Logger)) }
 

@@ -88,8 +88,8 @@ module Warren
     def subscribe!
       raise StandardError, 'Consumer already exists' unless @consumer.nil?
 
-      @consumer = @subscription.subscribe(@consumer_tag) do |delivery_info, metadata, payload|
-        process(delivery_info, metadata, payload)
+      @consumer = @subscription.subscribe(@consumer_tag) do |delivery_info, properties, payload|
+        process(delivery_info, properties, payload)
       end
     end
 
@@ -113,9 +113,9 @@ module Warren
       @adaptor.recovered?
     end
 
-    def process(delivery_info, metadata, payload)
+    def process(delivery_info, properties, payload)
       log_message(payload) do
-        message = Warren::Subscriber::Base.new(self, delivery_info, metadata, payload)
+        message = Warren::Subscriber::Base.new(self, delivery_info, properties, payload)
         @adaptor.handle { message._process_ }
       rescue Warren::Exceptions::TemporaryIssue => e
         warn { "Temporary Issue: #{e.message}" }

@@ -15,7 +15,8 @@ RSpec.describe Warren::Subscription do
             'exchange' => { 'name' => 'amqp.direct', 'options' => { type: 'direct' } },
             'options' => { routing_key: 'key' }
           }
-        ]
+        ],
+        'subscribed_class' => 'Warren::Subscriber::Base'
       }
     )
   end
@@ -66,5 +67,11 @@ RSpec.describe Warren::Subscription do
     it 'registers bindings' do
       expect(queue).to have_received(:bind).with(exchange, routing_key: 'key')
     end
+  end
+
+  describe '#subscribed_class' do
+    subject { subscription.subscribed_class }
+
+    it { is_expected.to eq Warren::Subscriber::Base }
   end
 end

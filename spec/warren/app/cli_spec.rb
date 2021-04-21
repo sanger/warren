@@ -7,7 +7,7 @@ RSpec.describe Warren::App::Cli do
   subject(:command) { described_class.start([action, *arguments]) }
 
   let(:default_path) { 'config/warren.yml' }
-  let(:a_thor_shell) { a_kind_of(Thor::Shell::Basic) }
+  let(:a_thor_shell) { a_kind_of(described_class) }
 
   describe '#config' do
     let(:action) { 'config' }

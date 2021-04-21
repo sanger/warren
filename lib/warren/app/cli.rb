@@ -24,7 +24,7 @@ module Warren
       option :exchange, type: :string,
                         desc: 'The RabbitMQ exchange to connect to'
       def config
-        Warren::App::Config.invoke(shell, path: options['path'], exchange: options['exchange'])
+        Warren::App::Config.invoke(self, path: options['path'], exchange: options['exchange'])
       end
 
       desc 'consumer {add|start}', 'add and start queue consumers'

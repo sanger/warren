@@ -19,6 +19,7 @@ module Warren
       @queue_name = config.fetch('name')
       @queue_options = config.fetch('options')
       @bindings = config.fetch('bindings')
+      @subscribed_class = config.fetch('subscribed_class')
     end
 
     def_delegators :channel, :nack, :ack
@@ -44,6 +45,10 @@ module Warren
     # keys: additional routing_keys to bind
     def activate!
       establish_bindings!
+    end
+
+    def subscribed_class
+      Object.const_get(@subscribed_class)
     end
 
     private

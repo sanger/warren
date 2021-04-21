@@ -4,6 +4,7 @@ require 'spec_helper'
 require 'thor'
 require 'yaml'
 require 'warren/app/consumer_add'
+require 'warren/app/consumer'
 
 RSpec.describe Warren::App::ConsumerAdd do
   shared_examples 'a consumer addition' do
@@ -12,19 +13,25 @@ RSpec.describe Warren::App::ConsumerAdd do
         .with('consumer_name', desc: 'my consumer', queue: 'queue_name', bindings: [{
                 'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
                 'options' => { routing_key: 'c' }
-              }])
+              }], subscribed_class: 'Warren::Subscriber::ConsumerName')
     end
 
     it 'saves the configuration' do
       expect(consumer_config).to have_received(:save)
     end
+
+    it 'generates a template' do
+      expect(shell).to have_received(:template).with('subscriber.tt',
+                                                     'app/warren/subscribers/consumer_name.rb',
+                                                     context: an_instance_of(Binding))
+    end
   end
 
   describe '::invoke' do
-    let(:shell) { instance_double(Thor::Shell::Basic) }
+    let(:shell) { instance_spy(Warren::App::Consumer) }
 
     let(:path) { 'tmp/test.yml' }
-    let(:consumer_config) { instance_double(Warren::Config::Consumers) }
+    let(:consumer_config) { instance_spy(Warren::Config::Consumers) }
 
     before do
       allow(Warren::Config::Consumers).to receive(:new).and_return(consumer_config)

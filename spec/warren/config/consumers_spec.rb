@@ -32,7 +32,10 @@ RSpec.describe Warren::Config::Consumers do
   end
 
   describe '#add_consumer' do
-    subject(:add_consumer) { consumers.add_consumer('name', desc: 'description', queue: 'queue_name', bindings: []) }
+    subject(:add_consumer) do
+      consumers.add_consumer('name', desc: 'description', queue: 'queue_name', bindings: [],
+                                     subscribed_class: 'Warren::Subscriber::Name')
+    end
 
     let(:expected_config) do
       {
@@ -41,7 +44,8 @@ RSpec.describe Warren::Config::Consumers do
           'name' => 'queue_name',
           'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => 'name.dead-letters' } },
           'bindings' => []
-        }
+        },
+        'subscribed_class' => 'Warren::Subscriber::Name'
       }
     end
 
@@ -71,7 +75,8 @@ RSpec.describe Warren::Config::Consumers do
                 'options' => { routing_key: 'c' }
               }
             ]
-          }
+          },
+          'subscribed_class' => 'Warren::Subscriber::Name'
         }
       }
       satisfy('a valid yaml file') { |v| YAML.safe_load(v, permitted_classes: [Symbol]) == parsed_yaml }
@@ -85,7 +90,8 @@ RSpec.describe Warren::Config::Consumers do
                                                  'options' => { type: 'direct', durable: true } },
                                  'options' => { routing_key: 'c' }
                                }
-                             ])
+                             ],
+                                     subscribed_class: 'Warren::Subscriber::Name')
       consumers.save
     end
 
