@@ -10,6 +10,20 @@ RSpec.describe Warren::Client do
   let(:config) { instance_double(Warren::Config::Consumers) }
   let(:client) { described_class.new(config, consumers: consumers) }
 
+  # Some helper methods to assist with setup
+  def mock_den(consumer_name, fox)
+    allow(Warren::Den).to receive(:new)
+      .with(consumer_name, config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
+      .and_return(instance_double(Warren::Den, fox: fox))
+  end
+
+  def run_client(client)
+    # Mock alive so that the control loop terminates after one loop
+    allow(client).to receive(:alive?).and_return(true, false)
+    allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
+    client.run
+  end
+
   # We don't have very many publicly expose methods here, run essentially
   # handles most of what we want. We'll also need to test our termination
   describe '#run' do
@@ -24,30 +38,19 @@ RSpec.describe Warren::Client do
       let(:fox) { instance_double(Warren::Fox, run!: true, attempt_recovery: true) }
 
       before do
-        allow(Warren::Den).to receive(:new)
-          .with('consumer_a', config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
-          .and_return(instance_double(Warren::Den, fox: fox))
+        mock_den('consumer_a', fox)
+        run_client(client)
       end
 
       it 'runs the fox' do
-        allow(client).to receive(:alive?).and_return(true, false)
-        allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
-        client.run
         expect(fox).to have_received(:run!)
       end
 
       it 'initializes the handler' do
-        allow(client).to receive(:alive?).and_return(true, false)
-        allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
-        client.run
         expect(handler).to have_received(:connect)
       end
 
       it 'enters a control loop' do
-        # Mock alive so that the control loop terminates immediately
-        allow(client).to receive(:alive?).and_return(true, false)
-        allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
-        client.run
         expect(fox).to have_received(:attempt_recovery)
       end
     end
@@ -63,26 +66,16 @@ RSpec.describe Warren::Client do
 
       before do
         allow(config).to receive(:all_consumers).and_return(%w[consumer_a consumer_b])
-        allow(Warren::Den).to receive(:new)
-          .with('consumer_a', config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
-          .and_return(instance_double(Warren::Den, fox: fox[0]))
-        allow(Warren::Den).to receive(:new)
-          .with('consumer_b', config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
-          .and_return(instance_double(Warren::Den, fox: fox[1]))
+        mock_den('consumer_a', fox[0])
+        mock_den('consumer_b', fox[1])
+        run_client(client)
       end
 
       it 'runs the foxes' do
-        # Mock alive so that the control loop terminates immediately
-        allow(client).to receive(:alive?).and_return(false)
-        client.run
         expect(fox).to all(have_received(:run!))
       end
 
       it 'enters a control loop' do
-        # Mock alive so that the control loop terminates immediately
-        allow(client).to receive(:alive?).and_return(true, false)
-        allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
-        client.run
         expect(fox).to all(have_received(:attempt_recovery))
       end
     end
@@ -99,10 +92,7 @@ RSpec.describe Warren::Client do
       let(:fox) { instance_double(Warren::Fox, run!: true, attempt_recovery: true, stop!: true) }
 
       before do
-        allow(Warren::Den).to receive(:new)
-          .with('consumer_a', config,
-                adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
-          .and_return(instance_double(Warren::Den, fox: fox))
+        mock_den('consumer_a', fox)
         allow(client).to receive(:sleep).with(3) # Disable the sleep for performance
       end
 
