@@ -57,6 +57,7 @@ connection pool, and use that instead.
         channel << message_b
     end
 ```
+
 ### Setting up a consumer
 
 A command line interface exists to assist with setting up consumers. It be be
