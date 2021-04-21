@@ -10,19 +10,16 @@ RSpec.describe Warren::Handler::Broadcast do
   end
 
   let(:server_options) { { heartbeat: 30, frame_max: 0 } }
-  let(:bun_session) { instance_double(Bunny::Session) }
-  let(:bun_channel) { instance_double(Bunny::Channel) }
-  let(:bun_exchange) { instance_double(Bunny::Exchange) }
+  let(:bun_session) { instance_spy(Bunny::Session, create_channel: bun_channel) }
+  let(:bun_channel) { instance_spy(Bunny::Channel) }
+  let(:bun_exchange) { instance_spy(Bunny::Exchange) }
+
+  before do
+    allow(Bunny).to receive(:new).with(server_options).and_return(bun_session)
+  end
 
   describe '#connect' do
     subject { warren.connect }
-
-    before do
-      allow(Bunny).to receive(:new)
-        .with(server_options)
-        .and_return(bun_session)
-      allow(bun_session).to receive(:start)
-    end
 
     it { is_expected.to eq true }
 
@@ -33,14 +30,9 @@ RSpec.describe Warren::Handler::Broadcast do
   end
 
   describe '#with_channel' do
-    let(:yielded_chanel) { instance_double(described_class::Channel) }
+    let(:yielded_chanel) { instance_spy(described_class::Channel) }
 
     before do
-      allow(Bunny).to receive(:new)
-        .with(server_options)
-        .and_return(bun_session)
-      allow(bun_session).to receive(:start)
-      allow(bun_session).to receive(:create_channel).and_return(bun_channel)
       allow(described_class::Channel).to receive(:new)
         .with(bun_channel, exchange: 'exchange', routing_key_template: 'test.%s')
         .and_return(yielded_chanel)
