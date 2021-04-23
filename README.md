@@ -87,7 +87,9 @@ The cli makes some opinionated assumptions to simplify setup process:
 - consumer-name.dead_letters will be bound to a queue of the same name
 - All queues and exchanges are durable
 
-These options can be over-ridden in the warren_consumers.yml file if necessary
+These options can be over-ridden in the warren_consumers.yml file if necessary.
+If you wish to completely disable dead-letter queue configuration, such as when
+using policies, then you can set dead_letters to false.
 
 ### Running consumers
 
@@ -111,7 +113,6 @@ some testing examples can be found in the documentation for the
 {Warren::Handler::Test test helper}, or online at
 [rubydoc.info](https://rubydoc.info/gems/sanger_warren/Warren/Handler/Test)
 
-
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run
@@ -126,4 +127,4 @@ git commits and tags, and push the `.gem` file to
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/Warren.
+Bug reports and pull requests are welcome on [GitHub](https://github.com/sanger/warren)
