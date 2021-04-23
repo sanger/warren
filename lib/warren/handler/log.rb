@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 module Warren
   module Handler
     # Class Warren::Log provides a dummy RabbitMQ
     # connection pool for use during development
-    class Log
+    class Log < Warren::Handler::Base
       # Mimics a {Broadcast::Channel} but instead passes out to a logger
       class Channel
         def initialize(logger, routing_key_template: '%s')
@@ -60,17 +62,10 @@ module Warren
       attr_reader :logger
 
       def initialize(logger:, routing_key_prefix: nil)
+        super()
         @logger = logger
         @routing_key_template = Handler.routing_key_template(routing_key_prefix)
       end
-
-      #
-      # Provide API compatibility with the RabbitMQ versions
-      # Do nothing in this case
-      #
-      def connect; end
-
-      def disconnect; end
 
       def new_channel
         Channel.new(@logger, routing_key_template: @routing_key_template)

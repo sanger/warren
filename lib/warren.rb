@@ -15,6 +15,19 @@ module Warren
   # Environmental variables
   WARREN_TYPE = 'WARREN_TYPE'
 
+  #
+  # Construct a {Warren::Handler::Base} of the type `type`.
+  # For Rails apps this is usually handled automatically by the initializer.
+  #
+  # @param type ['test','log','broadcast'] The type of warren handler to construct
+  # @param config [Hash] A configuration hash object
+  # @option config [Hash] :server Bunny connection parameters
+  #                               http://rubybunny.info/articles/connecting.html#using_a_map_of_parameters
+  # @option config [String] :exchange The default exchange to receive published messaged
+  # @option config [String] :routing_key_prefix A prefix to apply to all routing keys (Such as the environment)
+  #
+  # @return [Warren::Handler::Base] Exact class determined by the type passed in
+  #
   def self.construct(type:, config: {})
     warren_type = ENV.fetch(WARREN_TYPE, type)
     case warren_type
@@ -25,11 +38,17 @@ module Warren
     end
   end
 
+  # Constructs a Warren::Handler of the specified type and sets it as the global handler.
   def self.setup(opts, logger: Rails.logger)
     logger.warn 'Recreating Warren handler when one already exists' if handler.present?
     @handler = construct(**opts.symbolize_keys)
   end
 
+  #
+  # Returns the global Warren handler
+  #
+  # @return [Warren::Handler::Base] A warren handler for broadcasting messages
+  #
   def self.handler
     @handler
   end

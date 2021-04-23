@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Warren
+  # Exceptions used by the warren gem
   module Exceptions
     # raise {Warren::Exceptions::TemporaryIssue} in a {Warren::Subscriber} to
     # nack the message, requeuing it, and sending the consumers into sleep

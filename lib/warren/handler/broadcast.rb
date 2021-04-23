@@ -3,6 +3,7 @@
 require 'bunny'
 require 'forwardable'
 require 'connection_pool'
+require_relative 'base'
 
 module Warren
   module Handler
@@ -10,7 +11,7 @@ module Warren
     # Class Warren::Broadcast provides a connection pool of
     # threadsafe RabbitMQ channels for broadcasting messages
     #
-    class Broadcast
+    class Broadcast < Warren::Handler::Base
       # Wraps a Bunny::Channel
       # @see https://rubydoc.info/gems/bunny/Bunny/Channel
       class Channel
@@ -51,6 +52,7 @@ module Warren
       # @param [String,nil] routing_key_prefix The prefix to pass before the routing key.
       #                                        Can be used to ensure environments remain distinct.
       def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14)
+        super()
         @server = server
         @exchange_name = exchange
         @pool_size = pool_size

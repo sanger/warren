@@ -3,10 +3,7 @@
 require_relative 'message/full'
 require_relative 'callback/broadcast_with_warren'
 require_relative 'callback/broadcast_associated_with_warren'
-#
-# Module Warren::Callback provides methods to assist with
-# setting up message broadcast
-#
+
 module Warren
   #
   # Module Warren::Callback provides methods to assist with

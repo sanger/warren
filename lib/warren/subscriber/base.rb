@@ -4,6 +4,7 @@ require 'logger'
 require 'warren/exceptions'
 
 module Warren
+  # Namespace for warren subscriber objects
   module Subscriber
     # A message takes a rabbitMQ message, and handles its acknowledgement
     # or rejection.

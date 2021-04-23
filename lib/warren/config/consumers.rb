@@ -4,6 +4,7 @@ require 'yaml'
 # We probably don't want to require this here.
 require 'warren/app/exchange_config'
 module Warren
+  # Namespace for configuration objects
   module Config
     # Manages the configuration of consumers. By default, consumer configuration
     # is held in {DEFAULT_PATH config/warren_consumers.yml}

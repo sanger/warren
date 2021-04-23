@@ -12,6 +12,7 @@ module Warren
   # A fox is a rabbitMQ consumer. It handles subscription to the queue
   # and passing message on to the registered Subscriber
   class Fox
+    # A little cute fox emoji to easily flag output from the consumers
     FOX = '🦊'
 
     extend Forwardable
@@ -28,7 +29,6 @@ module Warren
     #
     # @param name [String] The name of the consumer
     # @param subscription [Warren::Subscription] Describes the queue to subscribe to
-    # @param env [String] A string identifying the environment
     # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
     #
     def initialize(name:, subscription:, adaptor:, subscribed_class:)
@@ -43,6 +43,12 @@ module Warren
     states :stopping, :stopped, :paused, :starting, :started, :running
     def_delegators :@logger, :warn, :info, :error, :debug
 
+    #
+    # Starts up the fox, automatically registering the configured queues and bindings
+    # before subscribing to the queue.
+    #
+    # @return [Void]
+    #
     def run!
       starting!
       subscription.activate! # Set up the queues
@@ -52,6 +58,11 @@ module Warren
       info { 'Started consumer' }
     end
 
+    #
+    # Stop the consumer and unsubscribes from the queue. Blocks until fully unsubscribed.
+    #
+    # @return [Void]
+    #
     def stop!
       info { 'Stopping consumer' }
       stopping!
@@ -60,6 +71,13 @@ module Warren
       stopped!
     end
 
+    #
+    # Temporarily unsubscribes the consumer, and schedules an attempted recovery.
+    # Recovery is triggered by the {#attempt_recovery} method which gets called
+    # periodically by {Warren::Client}
+    #
+    # @return [Void]
+    #
     def pause!
       return unless running?
 
@@ -69,7 +87,12 @@ module Warren
       paused!
     end
 
-    # Rest for database recovery and restore the consumer.
+    # If the fox is paused, and a recovery attempt is scheduled, will prompt
+    # the framework adaptor to attempt to recover. (Such as reconnecting to the
+    # database). If this operation is successful will resubscribe to the queue,
+    # otherwise a further recovery attempt will be scheduled. Successive recovery
+    # attempts will be gradually further apart, up to the MAX_RECONNECT_DELAY
+    # of 5 minutes.
     def attempt_recovery
       return unless paused? && recovery_due?
 
