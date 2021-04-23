@@ -112,8 +112,12 @@ module Warren
 
       private
 
+      def server_connection
+        ENV.fetch('WARREN_CONNECTION_URI', @server)
+      end
+
       def session
-        @session ||= Bunny.new(@server)
+        @session ||= Bunny.new(server_connection)
       end
 
       def connection_pool

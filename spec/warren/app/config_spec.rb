@@ -31,7 +31,7 @@ RSpec.describe Warren::App::Config do
             'routing_key_prefix' => 'development'
           }
         },
-        'test' => { 'type' => 'test', 'routing_key_prefix' => 'test' }
+        'test' => { 'type' => 'test', 'config' => { 'routing_key_prefix' => 'test' } }
       }
       # We're inlining comments, but are mostly concerned with the yaml
       # content. This ensures that the data map to what we expect

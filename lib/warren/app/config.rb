@@ -17,7 +17,8 @@ module Warren
           # Log mode does not actually use this configuration, but
           # it is provided for convenience when broadcast mode is enabled.
           # The provided settings are the default options of RabbitMQ
-          # DO NOT commit sensitive information in this file.
+          # DO NOT commit sensitive information in this file. Instead you may
+          # use the WARREN_CONNECTION_URI environmental variable
           config:
             server:
               host: localhost
@@ -34,7 +35,11 @@ module Warren
         # See: https://rubydoc.info/gems/sanger_warren/Warren/Handler/Test
         test:
           type: test
-          routing_key_prefix: test
+          config:
+            routing_key_prefix: test
+        # You are encouraged to use the WARREN_CONNECTION_URI environmental
+        # variable to configure your production environment. Under no
+        # circumstances should you commit sensitive information in the file.
       TEMPLATE
 
       def self.invoke(shell, path:, exchange: nil)
