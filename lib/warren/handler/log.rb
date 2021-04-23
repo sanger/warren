@@ -56,6 +56,7 @@ module Warren
         def subscribe(options)
           @logger.debug "Subscribed to queue #{@name}: #{options.inspect}"
           @logger.warn 'This is a Warren::Handler::Log no messages will be processed'
+          nil
         end
       end
 

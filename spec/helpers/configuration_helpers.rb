@@ -12,12 +12,12 @@ module Configuration
   end
 
   # Returns a full topic-exchange consumer configuration
-  def self.topic_exchange_consumer
+  def self.topic_exchange_consumer(subscribed_class: 'Warren::Subscriber::Name')
     {
       'desc' => 'description',
       'queue' => topic_exchange_queue,
       'dead_letters' => dead_letter_configuration,
-      'subscribed_class' => 'Warren::Subscriber::Name'
+      'subscribed_class' => subscribed_class
     }
   end
 

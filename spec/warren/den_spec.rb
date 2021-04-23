@@ -11,7 +11,9 @@ RSpec.describe Warren::Den do
   let(:channel) { instance_spy(Warren::Handler::Broadcast::Channel) }
 
   before do
-    allow(config).to receive(:consumer).with('app').and_return(Configuration.topic_exchange_consumer)
+    consumer_config = Configuration.topic_exchange_consumer(subscribed_class: 'Warren::Subscriber::Base')
+    allow(config).to receive(:consumer).with('app')
+                                       .and_return(consumer_config)
     allow(Warren).to receive(:handler).and_return(instance_spy(Warren::Handler::Broadcast, new_channel: channel))
   end
 

@@ -71,7 +71,7 @@ module Warren
     end
 
     def subscribed_class
-      consumer_config.fetch('subscribed_class')
+      Object.const_get(consumer_config.fetch('subscribed_class'))
     end
   end
 end

@@ -4,6 +4,7 @@ require 'warren/version'
 require 'warren/callback'
 require 'warren/handler'
 require 'warren/message'
+require 'warren/subscriber/base'
 
 # Load railties if rails is available
 require 'warren/railtie' if defined?(Rails::Railtie)
