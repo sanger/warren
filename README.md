@@ -14,11 +14,15 @@ gem 'sanger-warren'
 
 And then execute:
 
-    $ bundle install
+```bash
+bundle install
+```
 
 Or install it yourself as:
 
-    $ gem install sanger-warren
+```bash
+gem install sanger-warren
+```
 
 ## Usage
 
@@ -73,6 +77,17 @@ For more information about optional command line arguments you can supply to
 the cli use:
 
   $  bundle exec warren consumer add --help
+
+#### Opinionated defaults
+
+The cli makes some opinionated assumptions to simplify setup process:
+
+- Consumers will use a subscriber class named Warren::Subscribed::CamelCasedConsumerName
+- All consumers will dead-letter to the fanout exchange consumer-name.dead_letters
+- consumer-name.dead_letters will be bound to a queue of the same name
+- All queues and exchanges are durable
+
+These options can be over-ridden in the warren_consumers.yml file if necessary
 
 ### Running consumers
 
