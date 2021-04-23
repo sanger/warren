@@ -9,7 +9,7 @@ RSpec.describe Warren::App::ExchangeConfig do
   shared_examples 'a direct exchange' do
     let(:exchange_config) do
       {
-        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct', durable: true } },
         'options' => { routing_key: 'key_a' }
       }
     end
@@ -20,7 +20,7 @@ RSpec.describe Warren::App::ExchangeConfig do
   shared_examples 'a fanout exchange' do
     let(:exchange_config) do
       {
-        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout' } },
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'fanout', durable: true } },
         'options' => {}
       }
     end
@@ -31,10 +31,10 @@ RSpec.describe Warren::App::ExchangeConfig do
   shared_examples 'a topic exchange' do
     let(:exchange_config) do
       [{
-        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic', durable: true } },
         'options' => { routing_key: 'key_a' }
       }, {
-        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic' } },
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic', durable: true } },
         'options' => { routing_key: 'key_b' }
       }]
     end
@@ -45,7 +45,7 @@ RSpec.describe Warren::App::ExchangeConfig do
   shared_examples 'a header exchange' do
     let(:exchange_config) do
       {
-        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header' } },
+        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'header', durable: true } },
         'options' => { arguments: {} }
       }
     end

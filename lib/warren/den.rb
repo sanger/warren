@@ -26,18 +26,24 @@ module Warren
       @fox ||= spawn_fox
     end
 
-    # #
-    # # Ensures the dead_letter queues and exchanges are registered.
-    # #
-    # # @return [Void]
-    # def register_dead_letter_queues
-    #   subscription = Warren::Subscription.new(handler: Warren.handler, config: queue_config('.deadletters'))
-    #   client.start
-    #   subscription.activate!
-    #   client.stop
-    # end
+    #
+    # Ensures the dead_letter queues and exchanges are registered.
+    #
+    # @return [Void]
+    def register_dead_letter_queues
+      config = dead_letter_config
+      return unless config
+
+      channel = Warren.handler.new_channel
+      subscription = Warren::Subscription.new(channel: channel, config: config)
+      subscription.activate!
+    end
 
     private
+
+    def consumer_config
+      @config.consumer(@app_name)
+    end
 
     #
     # Spawn a new fox
@@ -50,11 +56,22 @@ module Warren
       # a per-queue basis. Currently that just means one worker per consumer.
       channel = Warren.handler.new_channel
       subscription = Warren::Subscription.new(channel: channel, config: queue_config)
-      Warren::Fox.new(name: @app_name, subscription: subscription, adaptor: @adaptor)
+      Warren::Fox.new(name: @app_name,
+                      subscription: subscription,
+                      adaptor: @adaptor,
+                      subscribed_class: subscribed_class)
     end
 
     def queue_config
-      @config.consumer(@app_name).fetch('queue')
+      consumer_config.fetch('queue')
+    end
+
+    def dead_letter_config
+      consumer_config.fetch('dead_letters')
+    end
+
+    def subscribed_class
+      consumer_config.fetch('subscribed_class')
     end
   end
 end

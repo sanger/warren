@@ -11,15 +11,14 @@ module Warren
     # Great a new subscription. Handles queue creation, binding and attaching
     # consumers to the queues
     #
-    # @param channel [<Type>] <description>
-    # @param config [<Type>] <description>
+    # @param channel [Warren::Handler::Broadcast::Channel] A chanel on which to register queues
+    # @param config [Hash] queue configuration hash
     #
     def initialize(channel:, config:)
       @channel = channel
       @queue_name = config.fetch('name')
       @queue_options = config.fetch('options')
       @bindings = config.fetch('bindings')
-      @subscribed_class = config.fetch('subscribed_class')
     end
 
     def_delegators :channel, :nack, :ack
@@ -28,7 +27,6 @@ module Warren
     # Subscribes to the given queue
     #
     # @param consumer_tag [String] Identifier for the consumer
-    # @param &block [<Type>] <description>
     #
     # @yieldparam [Bunny::DeliveryInfo] delivery_info Metadata about the delivery
     # @yieldparam [Bunny::MessageProperties] properties
@@ -45,10 +43,6 @@ module Warren
     # keys: additional routing_keys to bind
     def activate!
       establish_bindings!
-    end
-
-    def subscribed_class
-      Object.const_get(@subscribed_class)
     end
 
     private

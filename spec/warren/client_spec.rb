@@ -12,9 +12,11 @@ RSpec.describe Warren::Client do
 
   # Some helper methods to assist with setup
   def mock_den(consumer_name, fox)
+    den = instance_spy(Warren::Den, fox: fox)
     allow(Warren::Den).to receive(:new)
       .with(consumer_name, config, adaptor: be_an_instance_of(Warren::FrameworkAdaptor::RailsAdaptor))
-      .and_return(instance_double(Warren::Den, fox: fox))
+      .and_return(den)
+    den
   end
 
   def run_client(client)
@@ -34,16 +36,21 @@ RSpec.describe Warren::Client do
     end
 
     context 'with a single consumer' do
-      let(:consumers) { ['consumer_a'] }
+      let(:client) { described_class.new(config, consumers: ['consumer_a']) }
       let(:fox) { instance_double(Warren::Fox, run!: true, attempt_recovery: true) }
+      let(:den) { mock_den('consumer_a', fox) }
 
       before do
-        mock_den('consumer_a', fox)
+        den
         run_client(client)
       end
 
       it 'runs the fox' do
         expect(fox).to have_received(:run!)
+      end
+
+      it 'configures the dead-letter queues' do
+        expect(den).to have_received(:register_dead_letter_queues)
       end
 
       it 'initializes the handler' do
@@ -56,11 +63,11 @@ RSpec.describe Warren::Client do
     end
 
     context 'with all consumers' do
-      let(:consumers) { nil }
+      let(:client) { described_class.new(config, consumers: nil) }
       let(:fox) do
         [
-          instance_double(Warren::Fox, run!: true, attempt_recovery: true),
-          instance_double(Warren::Fox, run!: true, attempt_recovery: true)
+          instance_spy(Warren::Fox, run!: true, attempt_recovery: true),
+          instance_spy(Warren::Fox, run!: true, attempt_recovery: true)
         ]
       end
 
@@ -88,7 +95,7 @@ RSpec.describe Warren::Client do
     end
 
     context 'with a single consumer' do
-      let(:consumers) { ['consumer_a'] }
+      let(:client) { described_class.new(config, consumers: ['consumer_a']) }
       let(:fox) { instance_double(Warren::Fox, run!: true, attempt_recovery: true, stop!: true) }
 
       before do

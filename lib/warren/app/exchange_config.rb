@@ -66,6 +66,14 @@ module Warren
         end
       end
 
+      def self.default_dead_letter(name)
+        new(nil).add_binding('fanout', name, {})
+      end
+
+      def add_binding(type, name, options)
+        @bindings << config(type, name, options)
+      end
+
       private
 
       def ask_exchange_type
@@ -119,9 +127,9 @@ module Warren
         end
       end
 
-      def add_binding(type, name, options)
-        @bindings << {
-          'exchange' => { 'name' => name, 'options' => { type: type } },
+      def config(type, name, options)
+        {
+          'exchange' => { 'name' => name, 'options' => { type: type, durable: true } },
           'options' => options
         }
       end

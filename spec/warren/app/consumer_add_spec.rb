@@ -5,15 +5,15 @@ require 'thor'
 require 'yaml'
 require 'warren/app/consumer_add'
 require 'warren/app/consumer'
+require 'helpers/configuration_helpers'
 
 RSpec.describe Warren::App::ConsumerAdd do
   shared_examples 'a consumer addition' do
     it 'updates the configuration' do
       expect(consumer_config).to have_received(:add_consumer)
-        .with('consumer_name', desc: 'my consumer', queue: 'queue_name', bindings: [{
-                'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
-                'options' => { routing_key: 'c' }
-              }], subscribed_class: 'Warren::Subscriber::ConsumerName')
+        .with('consumer_name', desc: 'my consumer', queue: 'queue_name',
+                               bindings: Configuration.topic_exchange_bindings,
+                               subscribed_class: 'Warren::Subscriber::ConsumerName')
     end
 
     it 'saves the configuration' do
@@ -48,7 +48,7 @@ RSpec.describe Warren::App::ConsumerAdd do
         described_class.invoke(shell,
                                'existing_consumer',
                                { path: path, desc: 'my consumer',
-                                 queue: 'queue_name', bindings: ['direct:exchange_name:c'] })
+                                 queue: 'queue_name', bindings: ['topic:exchange_name:c'] })
       end
 
       before do
@@ -79,10 +79,7 @@ RSpec.describe Warren::App::ConsumerAdd do
         allow(shell).to receive(:ask).with('Provide the name of the queue to connect to: ').and_return('queue_name')
         allow(Warren::App::ExchangeConfig).to receive(:ask)
           .with(shell)
-          .and_return([{
-                        'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct' } },
-                        'options' => { routing_key: 'c' }
-                      }])
+          .and_return(Configuration.topic_exchange_bindings)
         invocation
       end
 
@@ -109,7 +106,7 @@ RSpec.describe Warren::App::ConsumerAdd do
       subject(:invocation) do
         described_class.invoke(shell, 'consumer_name',
                                { path: path, desc: 'my consumer',
-                                 queue: 'queue_name', bindings: ['direct:exchange_name:c'] })
+                                 queue: 'queue_name', bindings: ['topic:exchange_name:c'] })
       end
 
       before do

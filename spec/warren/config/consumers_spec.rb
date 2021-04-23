@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'warren/config/consumers'
+require 'helpers/configuration_helpers'
 
 RSpec.describe Warren::Config::Consumers do
   let(:path) { 'tmp/test.yml' }
@@ -10,9 +11,7 @@ RSpec.describe Warren::Config::Consumers do
   before do
     allow(YAML).to receive(:load_file)
       .with(path)
-      .and_return({
-                    'existing_consumer' => {}
-                  })
+      .and_return('existing_consumer' => {})
   end
 
   describe '#consumer_exist?' do
@@ -33,20 +32,13 @@ RSpec.describe Warren::Config::Consumers do
 
   describe '#add_consumer' do
     subject(:add_consumer) do
-      consumers.add_consumer('name', desc: 'description', queue: 'queue_name', bindings: [],
+      consumers.add_consumer('name', desc: 'description', queue: 'queue_name',
+                                     bindings: Configuration.topic_exchange_bindings,
                                      subscribed_class: 'Warren::Subscriber::Name')
     end
 
     let(:expected_config) do
-      {
-        'desc' => 'description',
-        'queue' => {
-          'name' => 'queue_name',
-          'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => 'name.dead-letters' } },
-          'bindings' => []
-        },
-        'subscribed_class' => 'Warren::Subscriber::Name'
-      }
+      Configuration.topic_exchange_consumer
     end
 
     it 'returns a consumer config hash' do
@@ -62,35 +54,15 @@ RSpec.describe Warren::Config::Consumers do
   describe '#save' do
     let(:file) { instance_double(File, write: 20) }
     let(:expected_payload) do
-      parsed_yaml = {
-        'existing_consumer' => {},
-        'name' => {
-          'desc' => 'description',
-          'queue' => {
-            'name' => 'queue_name',
-            'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => 'name.dead-letters' } },
-            'bindings' => [
-              {
-                'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'direct', durable: true } },
-                'options' => { routing_key: 'c' }
-              }
-            ]
-          },
-          'subscribed_class' => 'Warren::Subscriber::Name'
-        }
-      }
-      satisfy('a valid yaml file') { |v| YAML.safe_load(v, permitted_classes: [Symbol]) == parsed_yaml }
+      satisfy('a valid yaml file') do |v|
+        YAML.safe_load(v, permitted_classes: [Symbol]) == Configuration.warren_consumers
+      end
     end
 
     before do
       allow(File).to receive(:open).with(path, 'w').and_yield(file)
-      consumers.add_consumer('name', desc: 'description', queue: 'queue_name', bindings: [
-                               {
-                                 'exchange' => { 'name' => 'exchange_name',
-                                                 'options' => { type: 'direct', durable: true } },
-                                 'options' => { routing_key: 'c' }
-                               }
-                             ],
+      consumers.add_consumer('name', desc: 'description', queue: 'queue_name',
+                                     bindings: Configuration.topic_exchange_bindings,
                                      subscribed_class: 'Warren::Subscriber::Name')
       consumers.save
     end

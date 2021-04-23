@@ -31,12 +31,13 @@ module Warren
     # @param env [String] A string identifying the environment
     # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
     #
-    def initialize(name:, subscription:, adaptor:)
+    def initialize(name:, subscription:, adaptor:, subscribed_class:)
       @consumer_tag = "#{adaptor.env}_#{name}_#{Process.pid}"
-      @state = :initialized
       @subscription = subscription
       @logger = Warren::LogTagger.new(logger: adaptor.logger, tag: "#{FOX} #{@consumer_tag}")
       @adaptor = adaptor
+      @subscribed_class = subscribed_class
+      @state = :initialized
     end
 
     states :stopping, :stopped, :paused, :starting, :started, :running
@@ -115,7 +116,7 @@ module Warren
 
     def process(delivery_info, properties, payload)
       log_message(payload) do
-        message = Warren::Subscriber::Base.new(self, delivery_info, properties, payload)
+        message = @subscribed_class.new(self, delivery_info, properties, payload)
         @adaptor.handle { message._process_ }
       rescue Warren::Exceptions::TemporaryIssue => e
         warn { "Temporary Issue: #{e.message}" }

@@ -2,22 +2,14 @@
 
 require 'spec_helper'
 require 'warren/handler/broadcast'
+require 'warren/subscription'
+require 'helpers/configuration_helpers'
 
 RSpec.describe Warren::Subscription do
   subject(:subscription) do
     described_class.new(
       channel: channel,
-      config: {
-        'name' => 'test',
-        'options' => queue_options,
-        'bindings' => [
-          {
-            'exchange' => { 'name' => 'amqp.direct', 'options' => { type: 'direct' } },
-            'options' => { routing_key: 'key' }
-          }
-        ],
-        'subscribed_class' => 'Warren::Subscriber::Base'
-      }
+      config: Configuration.topic_exchange_queue
     )
   end
 
@@ -26,7 +18,7 @@ RSpec.describe Warren::Subscription do
   let(:queue_options) do
     {
       durable: true,
-      arguments: { 'x-dead-letter-exchange' => 'warren_test.dead-letters' }
+      arguments: { 'x-dead-letter-exchange' => 'name.dead-letters' }
     }
   end
 
@@ -38,7 +30,7 @@ RSpec.describe Warren::Subscription do
     end
 
     it 'registers a queue' do
-      expect(channel).to have_received(:queue).with('test', queue_options)
+      expect(channel).to have_received(:queue).with('queue_name', queue_options)
     end
 
     it 'subscribes to the queue' do
@@ -57,21 +49,15 @@ RSpec.describe Warren::Subscription do
     end
 
     it 'registers a queue' do
-      expect(channel).to have_received(:queue).with('test', queue_options)
+      expect(channel).to have_received(:queue).with('queue_name', queue_options)
     end
 
     it 'registers an exchange' do
-      expect(channel).to have_received(:exchange).with('amqp.direct', type: 'direct')
+      expect(channel).to have_received(:exchange).with('exchange_name', type: 'topic', durable: true)
     end
 
     it 'registers bindings' do
-      expect(queue).to have_received(:bind).with(exchange, routing_key: 'key')
+      expect(queue).to have_received(:bind).with(exchange, routing_key: 'c')
     end
-  end
-
-  describe '#subscribed_class' do
-    subject { subscription.subscribed_class }
-
-    it { is_expected.to eq Warren::Subscriber::Base }
   end
 end

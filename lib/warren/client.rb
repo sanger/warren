@@ -75,7 +75,12 @@ module Warren
 
     def foxes
       @foxes ||= @consumers.map do |consumer|
-        Den.new(consumer, @config, adaptor: @adaptor).fox
+        # Very soon we'll be doing some other stuff in this block.
+        # rubocop:disable Style/SymbolProc
+        Den.new(consumer, @config, adaptor: @adaptor).tap do |den|
+          den.register_dead_letter_queues
+        end.fox
+        # rubocop:enable Style/SymbolProc
       end
     end
 

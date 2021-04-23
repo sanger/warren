@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'yaml'
-
+# We probably don't want to require this here.
+require 'warren/app/exchange_config'
 module Warren
   module Config
     # Manages the configuration of consumers. By default, consumer configuration
@@ -62,18 +63,27 @@ module Warren
       # @return [Hash] The consumer configuration hash
       #
       def add_consumer(name, desc:, queue:, bindings:, subscribed_class:)
+        dead_letter_exchange = "#{name}.dead-letters"
         @config[name] = {
           'desc' => desc,
-          'queue' => {
-            'name' => queue,
-            'options' => { durable: true, arguments: { 'x-dead-letter-exchange' => "#{name}.dead-letters" } },
-            'bindings' => bindings
-          },
-          'subscribed_class' => subscribed_class
+          'queue' => queue_config(queue, bindings, dead_letter_exchange),
+          'subscribed_class' => subscribed_class,
+          # This smells wrong. I don't like the call back out to the App namespace
+          'dead_letters' => queue_config(dead_letter_exchange,
+                                         Warren::App::ExchangeConfig.default_dead_letter(dead_letter_exchange))
         }
       end
 
       private
+
+      def queue_config(queue_name, bindings, dead_letter_exchange = nil)
+        arguments = dead_letter_exchange ? { 'x-dead-letter-exchange' => dead_letter_exchange } : {}
+        {
+          'name' => queue_name,
+          'options' => { durable: true, arguments: arguments },
+          'bindings' => bindings
+        }
+      end
 
       #
       # Loads the configuration, should be a hash
