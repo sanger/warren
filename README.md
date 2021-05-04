@@ -38,7 +38,9 @@ In development mode, warren is usually configured to log to the console only. If
 you wish to enable broadcast mode, the easiest way is via an environmental
 variable, WARREN_TYPE.
 
-  $ WARREN_TYPE=broadcast bundle exec rails s
+```bash
+WARREN_TYPE=broadcast bundle exec rails s
+```
 
 ### Broadcasting a message
 
@@ -67,7 +69,9 @@ connection pool, and use that instead.
 A command line interface exists to assist with setting up consumers. It be be
 invoked with:
 
-  $ bundle exec warren consumer add
+```bash
+bundle exec warren consumer add
+```
 
 This will guide you through configuration, and template out a subscriber class.
 Subscribers receive the message payload, and metadata information and process
@@ -76,7 +80,9 @@ them in their #process method.
 For more information about optional command line arguments you can supply to
 the cli use:
 
-  $  bundle exec warren consumer add --help
+```bash
+bundle exec warren consumer add --help
+```
 
 #### Opinionated defaults
 
@@ -95,16 +101,22 @@ using policies, then you can set dead_letters to false.
 
 To run all configure consumers use:
 
-  $ bundle exec warren consumer start
+```bash
+bundle exec warren consumer start
+```
 
 You can also run only a subset of consumers:
 
-  $ bundle exec warren consumer start --consumers=consumer_name other_consumer
+```bash
+bundle exec warren consumer start --consumers=consumer_name other_consumer
+```
 
 If you are testing in development, don't forget to set the WARREN_TYPE
 environmental variable if you want to pull messages off an actual queue.
 
-  $ WARREN_TYPE=broadcast bundle exec warren consumer start
+```bash
+WARREN_TYPE=broadcast bundle exec warren consumer start
+```
 
 ## Testing
 
