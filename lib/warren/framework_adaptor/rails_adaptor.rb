@@ -16,7 +16,7 @@ module Warren
       # Under normal circumstances Class#=== returns true for instances of that
       # class. Here we override that behaviour and explicitly check for a
       # database connection instead. This ensures that regardless of what
-      # exception gets thrown if we loose access to the database, we coreectly
+      # exception gets thrown if we loose access to the database, we correctly
       # handle the message
       class ConnectionMissing
         def self.===(_)
@@ -24,7 +24,12 @@ module Warren
           # of errors that might indicate connectivity issues. But this list
           # just grew and grew over time. So instead we just explicitly check
           # the outcome
-          !ActiveRecord::Base.connected?
+          !ActiveRecord::Base.connection.active?
+        rescue StandardError => _e
+          # Unfortunately ActiveRecord::Base.connection.active? can throw an
+          # exception if it is unable to connect, and furthermore the class
+          # depends on the adapter used.
+          true
         end
       end
 
@@ -36,11 +41,23 @@ module Warren
       end
 
       def handle
-        ActiveRecord::Base.connection_pool.with_connection do
+        with_connection do
           yield
         rescue ConnectionMissing => e
           raise Warren::Exceptions::TemporaryIssue, e.message
         end
+      end
+
+      def with_connection
+        begin
+          ActiveRecord::Base.connection
+        rescue StandardError => e
+          raise Warren::Exceptions::TemporaryIssue, e.message
+        end
+
+        yield
+      ensure
+        ActiveRecord::Base.clear_active_connections!
       end
 
       def env

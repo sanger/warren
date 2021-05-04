@@ -34,9 +34,8 @@ RSpec.describe Warren::FrameworkAdaptor::RailsAdaptor do
   describe '#handle' do
     context 'when the database is up and working' do
       let(:active_record_base) do
-        connection_pool = instance_double(ActiveRecord::ConnectionAdapters::ConnectionPool)
-        allow(connection_pool).to receive(:with_connection).and_yield
-        class_double(ActiveRecord::Base, connection_pool: connection_pool, connected?: true)
+        adapter = instance_double(ActiveRecord::ConnectionAdapters::AbstractAdapter, active?: true)
+        class_spy(ActiveRecord::Base, connection: adapter)
       end
 
       it 'does not capture the exception' do
@@ -46,13 +45,26 @@ RSpec.describe Warren::FrameworkAdaptor::RailsAdaptor do
 
     context 'when the database is down' do
       let(:active_record_base) do
-        connection_pool = instance_double(ActiveRecord::ConnectionAdapters::ConnectionPool)
-        allow(connection_pool).to receive(:with_connection).and_yield
-        class_double(ActiveRecord::Base, connection_pool: connection_pool, connected?: false)
+        adapter = instance_double(ActiveRecord::ConnectionAdapters::AbstractAdapter, active?: false)
+        class_spy(ActiveRecord::Base, connection: adapter)
       end
 
       it 'captures and converts the exception' do
         expect { described_class.new.handle { raise 'Error' } }.to raise_error(Warren::Exceptions::TemporaryIssue)
+      end
+    end
+
+    context "when we can't even connect" do
+      let(:active_record_base) do
+        # adapter = instance_double(ActiveRecord::ConnectionAdapters::AbstractAdapter, active?: false)
+        # class_spy(ActiveRecord::Base, connection: adapter)
+        spy = class_spy(ActiveRecord::Base)
+        allow(spy).to receive(:connection).and_raise(StandardError, 'exception depends on adapter')
+        spy
+      end
+
+      it 'captures and converts the exception' do
+        expect { described_class.new.handle { 'Nothing bad' } }.to raise_error(Warren::Exceptions::TemporaryIssue)
       end
     end
   end
