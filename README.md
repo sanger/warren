@@ -21,7 +21,7 @@ bundle install
 Or install it yourself as:
 
 ```bash
-gem install sanger-warren
+gem install sanger_warren
 ```
 
 ## Usage
