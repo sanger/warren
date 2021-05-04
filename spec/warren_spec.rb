@@ -12,7 +12,7 @@ RSpec.describe Warren do
 
     context 'when type is log' do
       let(:type) { 'log' }
-      let(:logger) { double('logger') } # rubocop:todo RSpec/VerifiedDoubles
+      let(:logger) { instance_double(Logger) }
       let(:config) { { logger: logger, routing_key_prefix: 'test' } }
 
       it { is_expected.to be_a Warren::Handler::Log }

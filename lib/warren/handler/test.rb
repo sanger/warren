@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 module Warren
   module Handler
     # Class Warren::Test provides provides a dummy RabbitMQ
@@ -47,7 +49,9 @@ module Warren
     #       expect(warren.messages_matching(routing_key)).to eq(1)
     #     end
     #   end
-    class Test
+    class Test < Warren::Handler::Base
+      # Warning displayed if the user attempts to make assertions against the
+      # handler without having enabled it.
       DISABLED_WARNING = <<~DISABLED_WARREN
         Test made against a disabled warren.
         Warren::Handler::Test must be explicitly enabled to track messages,
@@ -76,6 +80,10 @@ module Warren
         def <<(message)
           @warren << message
         end
+
+        def add_exchange(name, options)
+          @warren.add_exchange(name, options)
+        end
       end
 
       #
@@ -85,17 +93,11 @@ module Warren
       # @param [_] _args Configuration arguments are ignored.
       #
       def initialize(*_args)
+        super()
         @messages = []
+        @exchanges = []
         @enabled = false
       end
-
-      #
-      # Provide API compatibility with the RabbitMQ versions
-      # Do nothing in this case
-      #
-      def connect; end
-
-      def disconnect; end
 
       #
       # Yields a new chanel, which proxies all message back to {messages} on the
@@ -105,7 +107,17 @@ module Warren
       #
       # @yieldreturn [Warren::Test::Channel] A rabbitMQ channel that logs messaged to the test warren
       def with_channel
-        yield Channel.new(self)
+        yield new_channel
+      end
+
+      #
+      # Returns a new chanel, which proxies all message back to {messages} on the
+      # {Warren::Handler::Test}
+      #
+      # @return [Warren::Test::Channel] A rabbitMQ channel that logs messaged to the test warren
+      #
+      def new_channel
+        Channel.new(@logger, routing_key_template: @routing_key_template)
       end
 
       #
@@ -115,6 +127,7 @@ module Warren
       #
       def clear_messages
         @messages = []
+        @exchanges = []
       end
 
       #
@@ -170,6 +183,10 @@ module Warren
       # Disable message logging if not required
       def <<(message)
         @messages << message if @enabled
+      end
+
+      def add_exchange(name, options)
+        @exchanges << [name, options] if @enabled
       end
 
       private

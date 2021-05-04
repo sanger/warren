@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+# Warren powered <%= name %> consumers
+# <%= desc %>
+# Takes messages from the <%= queue %> queue
+#
+# == Example Message
+# Add example message here
+#
+class <%= subscribed_class %> < Warren::Subscriber::Base
+  # == Handling messages
+  # Message processing is handled in the {#process} method. The following
+  # methods will be useful:
+  #
+  # @!attribute [r] payload
+  #   @return [String] the payload of the message
+  # @!attribute [r] delivery_info
+  #   @return [Bunny::DeliveryInfo] mostly used internally for nack/acking messages
+  #                                 http://rubybunny.info/articles/queues.html#accessing_message_properties_metadata
+  # @!attribute [r] properties
+  #   @return [Bunny::MessageProperties] additional message properties.
+  #                             http://rubybunny.info/articles/queues.html#accessing_message_properties_metadata
+
+  # Handles message processing. Messages are acknowledged automatically
+  # on return from the method assuming they haven't been handled already.
+  # In the event of an uncaught exception, the message will be dead-lettered.
+  def process
+    # Handle message processing here. Additionally you have the following options:
+    # dead_letter(exception) => Dead Letters the message
+    # requeue(exception) => Sends a nack, which causes the message to be placed back on the queue
+  end
+end

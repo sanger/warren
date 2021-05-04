@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'warren/app/cli'
+require 'warren/app/config'
 require 'yaml'
+require 'thor'
 
 RSpec.describe Warren::App::Config do
   describe '::invoke' do
@@ -26,11 +27,14 @@ RSpec.describe Warren::App::Config do
               'frame_max' => 0,
               'heartbeat' => 30
             },
-            'exchange' => 'exchange'
+            'exchange' => 'exchange',
+            'routing_key_prefix' => 'development'
           }
         },
-        'test' => { 'type' => 'test' }
+        'test' => { 'type' => 'test', 'config' => { 'routing_key_prefix' => 'test' } }
       }
+      # We're inlining comments, but are mostly concerned with the yaml
+      # content. This ensures that the data map to what we expect
       satisfy('a valid yaml file') { |v| YAML.safe_load(v) == parsed_yaml }
     end
 
@@ -50,7 +54,7 @@ RSpec.describe Warren::App::Config do
 
     context 'with an existing file and complete configuration' do
       before do
-        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite? ").and_return(true)
+        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite (Y/N)? ").and_return(true)
       end
 
       let(:exist) { true }
@@ -68,7 +72,7 @@ RSpec.describe Warren::App::Config do
 
     context 'with an existing file which is aborted' do
       before do
-        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite? ").and_return(false)
+        allow(shell).to receive(:yes?).with("#{path} exists. Overwrite (Y/N)? ").and_return(false)
       end
 
       let(:exist) { true }

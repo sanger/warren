@@ -11,6 +11,7 @@ Unreleased section to make new releases easy.
   You can remove the `config/initializers/warren.rb` and the `config.warren = config_for(:warren)`
   line from `config/application.rb`
 - Added `warren config` CLI to help generate a warren.yml configuration file.
+- Added warren consumers managed through `warren consumer`
 
 ## Initial release
 

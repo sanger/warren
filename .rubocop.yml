@@ -24,3 +24,4 @@ Metrics/BlockLength:
   - '*.gemspec'
   IgnoredMethods:
    - describe
+   - context
