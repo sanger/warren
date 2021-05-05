@@ -14,7 +14,7 @@ RSpec.describe Warren::Subscription do
   end
 
   let(:queue) { instance_spy(Bunny::Queue) }
-  let(:channel) { instance_spy(Warren::Handler::Broadcast::Channel, queue: queue) }
+  let(:channel) { instance_spy(Warren::Handler::Broadcast::Channel, queue: queue, routing_key_prefix: 'test') }
   let(:queue_options) do
     {
       durable: true,
@@ -57,7 +57,7 @@ RSpec.describe Warren::Subscription do
     end
 
     it 'registers bindings' do
-      expect(queue).to have_received(:bind).with(exchange, routing_key: 'c')
+      expect(queue).to have_received(:bind).with(exchange, routing_key: 'test.c')
     end
   end
 end

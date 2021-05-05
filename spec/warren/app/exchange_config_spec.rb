@@ -55,7 +55,7 @@ RSpec.describe Warren::App::ExchangeConfig do
 
   describe '::ask' do
     let(:subject) { described_class.ask(shell) }
-    let(:shell) { instance_double(Thor::Shell::Basic) }
+    let(:shell) { instance_spy(Thor::Shell::Basic) }
 
     before do
       allow(shell).to receive(:ask).with(

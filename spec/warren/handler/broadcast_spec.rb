@@ -34,7 +34,7 @@ RSpec.describe Warren::Handler::Broadcast do
 
     before do
       allow(described_class::Channel).to receive(:new)
-        .with(bun_channel, exchange: 'exchange', routing_key_template: 'test.%s')
+        .with(bun_channel, exchange: 'exchange', routing_key_prefix: 'test')
         .and_return(yielded_chanel)
     end
 
@@ -50,13 +50,13 @@ RSpec.describe Warren::Handler::Broadcast do
     it 'configures the channel' do
       warren.with_channel { |_| nil }
       expect(described_class::Channel).to have_received(:new)
-        .with(bun_channel, exchange: 'exchange', routing_key_template: 'test.%s')
+        .with(bun_channel, exchange: 'exchange', routing_key_prefix: 'test')
     end
   end
 
   describe 'Warren::Broadcast::Channel' do
     let(:channel) do
-      described_class::Channel.new(bun_channel, exchange: 'exchange', routing_key_template: 'test.%s')
+      described_class::Channel.new(bun_channel, exchange: 'exchange', routing_key_prefix: 'test')
     end
 
     describe '#<<' do
