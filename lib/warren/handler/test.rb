@@ -100,7 +100,7 @@ module Warren
       end
 
       #
-      # Yields a new chanel, which proxies all message back to {messages} on the
+      # Yields a new channel, which proxies all message back to {messages} on the
       # {Warren::Handler::Test}
       #
       # @return [void]
@@ -111,7 +111,7 @@ module Warren
       end
 
       #
-      # Returns a new chanel, which proxies all message back to {messages} on the
+      # Returns a new channel, which proxies all message back to {messages} on the
       # {Warren::Handler::Test}
       #
       # @return [Warren::Test::Channel] A rabbitMQ channel that logs messaged to the test warren

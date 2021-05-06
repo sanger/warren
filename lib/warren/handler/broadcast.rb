@@ -17,12 +17,15 @@ module Warren
       class Channel
         extend Forwardable
 
+        attr_reader :routing_key_prefix
+
         def_delegators :@bun_channel, :close, :exchange, :queue, :prefetch, :ack, :nack
 
-        def initialize(bun_channel, routing_key_template:, exchange: nil)
+        def initialize(bun_channel, routing_key_prefix:, exchange: nil)
           @bun_channel = bun_channel
           @exchange_name = exchange
-          @routing_key_template = routing_key_template
+          @routing_key_prefix = routing_key_prefix
+          @routing_key_template = Handler.routing_key_template(routing_key_prefix)
         end
 
         def <<(message)
@@ -56,7 +59,7 @@ module Warren
         @server = server
         @exchange_name = exchange
         @pool_size = pool_size
-        @routing_key_template = Handler.routing_key_template(routing_key_prefix)
+        @routing_key_prefix = routing_key_prefix
       end
 
       #
@@ -107,7 +110,7 @@ module Warren
 
       def new_channel
         Channel.new(session.create_channel(nil, 1), exchange: @exchange_name,
-                                                    routing_key_template: @routing_key_template)
+                                                    routing_key_prefix: @routing_key_prefix)
       end
 
       private

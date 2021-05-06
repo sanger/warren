@@ -34,7 +34,12 @@ module Configuration
     [
       {
         'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic', durable: true } },
-        'options' => { routing_key: 'c' }
+        # Suggested cop style of %<routing_key_prefix>s but prefer suggesting the simpler option as it
+        # would be all to easy to miss out the 's', resulting in varying behaviour depending on the following
+        # character
+        # rubocop:disable Style/FormatStringToken
+        'options' => { routing_key: '%{routing_key_prefix}.c' }
+        # rubocop:enable Style/FormatStringToken
       }
     ]
   end

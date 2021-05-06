@@ -48,7 +48,10 @@ RSpec.describe Warren::App::ConsumerAdd do
         described_class.invoke(shell,
                                'existing_consumer',
                                { path: path, desc: 'my consumer',
-                                 queue: 'queue_name', bindings: ['topic:exchange_name:c'] })
+                                 # Match the format we suggest to the user in lib/warren/app/exchange_config.rb
+                                 # rubocop:disable Style/FormatStringToken
+                                 queue: 'queue_name', bindings: ['topic:exchange_name:%{routing_key_prefix}.c'] })
+        # rubocop:enable Style/FormatStringToken
       end
 
       before do
@@ -106,7 +109,10 @@ RSpec.describe Warren::App::ConsumerAdd do
       subject(:invocation) do
         described_class.invoke(shell, 'consumer_name',
                                { path: path, desc: 'my consumer',
-                                 queue: 'queue_name', bindings: ['topic:exchange_name:c'] })
+                                 # Match the format we suggest to the user in lib/warren/app/exchange_config.rb
+                                 # rubocop:disable Style/FormatStringToken
+                                 queue: 'queue_name', bindings: ['topic:exchange_name:%{routing_key_prefix}.c'] })
+        # rubocop:enable Style/FormatStringToken
       end
 
       before do

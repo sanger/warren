@@ -11,7 +11,7 @@ module Warren
     # Great a new subscription. Handles queue creation, binding and attaching
     # consumers to the queues
     #
-    # @param channel [Warren::Handler::Broadcast::Channel] A chanel on which to register queues
+    # @param channel [Warren::Handler::Broadcast::Channel] A channel on which to register queues
     # @param config [Hash] queue configuration hash
     #
     def initialize(channel:, config:)
@@ -64,7 +64,14 @@ module Warren
     def establish_bindings!
       @bindings.each do |binding_config|
         exchange = exchange(binding_config['exchange'])
-        add_binding(exchange, binding_config['options'])
+        transformed_options = merge_routing_key_prefix(binding_config['options'])
+        add_binding(exchange, transformed_options)
+      end
+    end
+
+    def merge_routing_key_prefix(options)
+      options.transform_values do |value|
+        format(value, routing_key_prefix: channel.routing_key_prefix)
       end
     end
   end

@@ -102,6 +102,7 @@ module Warren
 
       def ask_direct_binding
         exchange = ask_exchange
+        routing_key_tip
         routing_key = @shell.ask 'Specify a routing_key: '
         add_binding('direct', exchange, { routing_key: routing_key })
       end
@@ -119,6 +120,7 @@ module Warren
 
       def ask_topic_binding
         exchange = ask_exchange
+        routing_key_tip
         loop do
           routing_key = @shell.ask 'Specify a routing_key [Leave blank to stop adding]: '
           break if routing_key == ''
@@ -132,6 +134,17 @@ module Warren
           'exchange' => { 'name' => name, 'options' => { type: type, durable: true } },
           'options' => options
         }
+      end
+
+      def routing_key_tip
+        # Suggested cop style of %<routing_key_prefix>s but prefer suggesting the simpler option as it
+        # would be all to easy to miss out the 's', resulting in varying behaviour depending on the following
+        # character
+        # rubocop:disable Style/FormatStringToken
+        @shell.say(
+          'Tip: Use %{routing_key_prefix} in routing keys to reference the routing_key_prefix specified in warren.yml'
+        )
+        # rubocop:enable Style/FormatStringToken
       end
     end
   end
