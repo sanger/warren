@@ -5,6 +5,8 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 
 - Added railties to automatically initialize and configure Warren in rails apps.
