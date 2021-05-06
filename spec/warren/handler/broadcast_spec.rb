@@ -30,16 +30,16 @@ RSpec.describe Warren::Handler::Broadcast do
   end
 
   describe '#with_channel' do
-    let(:yielded_chanel) { instance_spy(described_class::Channel) }
+    let(:yielded_channel) { instance_spy(described_class::Channel) }
 
     before do
       allow(described_class::Channel).to receive(:new)
         .with(bun_channel, exchange: 'exchange', routing_key_prefix: 'test')
-        .and_return(yielded_chanel)
+        .and_return(yielded_channel)
     end
 
     it 'yields a channel' do
-      expect { |b| warren.with_channel(&b) }.to yield_with_args(yielded_chanel)
+      expect { |b| warren.with_channel(&b) }.to yield_with_args(yielded_channel)
     end
 
     it 'starts the bunny session' do

@@ -11,7 +11,7 @@ module Warren
     # Great a new subscription. Handles queue creation, binding and attaching
     # consumers to the queues
     #
-    # @param channel [Warren::Handler::Broadcast::Channel] A chanel on which to register queues
+    # @param channel [Warren::Handler::Broadcast::Channel] A channel on which to register queues
     # @param config [Hash] queue configuration hash
     #
     def initialize(channel:, config:)
