@@ -45,6 +45,8 @@ module Warren
       establish_bindings!
     end
 
+    def delay(payload, routing_key:, headers: {}); end
+
     private
 
     def add_binding(exchange, options)
