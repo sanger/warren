@@ -30,6 +30,7 @@ module Warren
     # @param name [String] The name of the consumer
     # @param subscription [Warren::Subscription] Describes the queue to subscribe to
     # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
+    # @param subscribed_class [Warren::Subscriber::Base] The class to process received messages
     #
     def initialize(name:, subscription:, adaptor:, subscribed_class:)
       @consumer_tag = "#{adaptor.env}_#{name}_#{Process.pid}"
