@@ -32,6 +32,13 @@ If using with a Rails app, you can simply run `bundle exec warren config` to
 help generate a warren config file. Warren will automatically be initialize
 on Rails start-up.
 
+In rails 5 you will need to add the following to your `config/application.rb`
+to ensure the auto-loader can find the subscribers.
+
+```ruby
+config.autoload_paths += %W{#{Rails.root}/app}
+```
+
 ### Handler types
 
 In development mode, warren is usually configured to log to the console only. If
