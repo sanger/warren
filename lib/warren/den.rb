@@ -34,9 +34,10 @@ module Warren
       config = dead_letter_config
       return unless config
 
-      channel = Warren.handler.new_channel
-      subscription = Warren::Subscription.new(channel: channel, config: config)
-      subscription.activate!
+      Warren.handler.with_channel do |channel|
+        subscription = Warren::Subscription.new(channel: channel, config: config)
+        subscription.activate!
+      end
     end
 
     private
