@@ -71,6 +71,10 @@ module Warren
       consumer_config.fetch('dead_letters')
     end
 
+    def delay_config
+      consumer_config.fetch('delay')
+    end
+
     def subscribed_class
       Object.const_get(consumer_config.fetch('subscribed_class'))
     end

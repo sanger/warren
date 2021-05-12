@@ -45,7 +45,17 @@ module Warren
       establish_bindings!
     end
 
-    def delay(payload, routing_key:, headers: {}); end
+    #
+    # Post a message to the configured exchange.
+    #
+    # @param payload [String] The message payload
+    # @param routing_key [String] The routing key of the re-sent message
+    # @param headers [Hash] A hash of headers. Typically: { attempts: <Integer> }
+    # @option headers [Integer] :attempts The number of times the message has been processed
+    #
+    # @return [Void]
+    #
+    def publish(payload, routing_key:, headers: {}); end
 
     private
 

@@ -20,8 +20,10 @@ RSpec.describe Warren::Subscriber::Base do
   end
 
   let(:subscription) { instance_spy(Warren::Subscription, 'subscription') }
+  let(:delayed) { instance_spy(Warren::Subscription, 'delayed') }
+
   let(:retry_attempts) { 0 }
-  let(:fox) { instance_spy(Warren::Fox, subscription: subscription, error: nil, warn: nil) }
+  let(:fox) { instance_spy(Warren::Fox, subscription: subscription, error: nil, warn: nil, delayed: delayed) }
 
   describe '#process' do
     it 'acknowledges the message' do
@@ -73,7 +75,7 @@ RSpec.describe Warren::Subscriber::Base do
       end
 
       it 'posts the  message to the delay exchange' do
-        expect(subscription).to have_received(:delay).with('Hello', routing_key: 'test.key', headers: { attempts: 1 })
+        expect(delayed).to have_received(:publish).with('Hello', routing_key: 'test.key', headers: { attempts: 1 })
       end
 
       it 'logs the issue', aggregate_failures: true do
@@ -90,7 +92,7 @@ RSpec.describe Warren::Subscriber::Base do
       end
 
       it 'does not post the  message to the delay exchange' do
-        expect(subscription).not_to have_received(:delay)
+        expect(subscription).not_to have_received(:publish)
       end
 
       it 'logs the issue', aggregate_failures: true do

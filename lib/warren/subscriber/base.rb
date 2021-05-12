@@ -24,7 +24,7 @@ module Warren
       # delegators (Supplied by Forwardable)
       # Essentially syntax is:
       # def_delegators <target>, *<methods_to_delegate>
-      def_delegators :fox, :subscription, :warn, :info, :error, :debug
+      def_delegators :fox, :subscription, :warn, :info, :error, :debug, :delayed
       def_delegators :delivery_info, :routing_key, :delivery_tag
 
       #
@@ -99,7 +99,7 @@ module Warren
         warn "Delay: #{payload}"
         warn "Delay Exception: #{exception.message}"
         # Publish the message to the delay queue
-        subscription.delay(payload, routing_key: routing_key, headers: { attempts: attempt + 1 })
+        delayed.publish(payload, routing_key: routing_key, headers: { attempts: attempt + 1 })
         # Acknowledge the original message
         ack
       end
