@@ -7,6 +7,7 @@ Unreleased section to make new releases easy.
 
 ### Added
 
+- Added support for delay exchanges to process messages after a fixed delay
 - Increased documentation
 
 ### Removed
