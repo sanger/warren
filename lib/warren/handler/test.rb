@@ -80,10 +80,6 @@ module Warren
         def <<(message)
           @warren << message
         end
-
-        def add_exchange(name, options)
-          @warren.add_exchange(name, options)
-        end
       end
 
       #
@@ -183,10 +179,6 @@ module Warren
       # Disable message logging if not required
       def <<(message)
         @messages << message if @enabled
-      end
-
-      def add_exchange(name, options)
-        @exchanges << [name, options] if @enabled
       end
 
       private

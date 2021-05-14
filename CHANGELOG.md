@@ -5,6 +5,11 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+### Removed
+
+- Warren::Handler::Test and Warren::Handler::Test::Channel no loner respond to
+  `add_exchange`. These methods were undocumented, and unused internally.
+
 ## [0.2.0]
 
 ### Added
