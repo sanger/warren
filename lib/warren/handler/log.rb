@@ -14,6 +14,13 @@ module Warren
           @routing_key_template = routing_key_template
         end
 
+        # Logs `message` to the configured logger
+        #
+        # @param message [#routing_key,#payload] A message should respond to routing_key and payload.
+        #                                        @see Warren::Message::Full
+        #
+        # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
+        #
         def <<(message)
           @logger.info "Published: #{key_for(message)}"
           @logger.debug "Payload: #{message.payload}"
@@ -40,6 +47,7 @@ module Warren
         end
       end
 
+      # Small object to track exchange properties for logging purposes
       Exchange = Struct.new(:name, :options)
 
       # Queue class to provide extended logging in development mode

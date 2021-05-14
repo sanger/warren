@@ -42,6 +42,16 @@ module Warren
         # circumstances should you commit sensitive information in the file.
       TEMPLATE
 
+      # Triggers the configuration task. Primarily called by the Thor CLI.
+      # Will either use arguments passed in from the command line, or prompt the
+      # user for them if missing.
+      #
+      # @param shell [Thor::Shell::Basic] Thor shell instance for feedback
+      # @param path [String] Path to the `warren.yml` file
+      # @param exchange [String, nil] Name of the exchange to use, if passed in from CLI
+      #
+      # @return [Void]
+      #
       def self.invoke(shell, path:, exchange: nil)
         new(shell, path: path, exchange: exchange).invoke
       end

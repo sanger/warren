@@ -28,6 +28,13 @@ module Warren
           @routing_key_template = Handler.routing_key_template(routing_key_prefix)
         end
 
+        # Publishes `message` to the configured exchange
+        #
+        # @param message [#routing_key,#payload] A message should respond to routing_key and payload.
+        #                                        @see Warren::Message::Full
+        #
+        # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
+        #
         def <<(message)
           default_exchange.publish(message.payload, routing_key: key_for(message))
           self

@@ -23,6 +23,7 @@ module Warren
                     desc: 'The path to the configuration file to generate'
       option :exchange, type: :string,
                         desc: 'The RabbitMQ exchange to connect to'
+      # Invoked by `$ warren config` generates a `warren.yml` file.
       def config
         Warren::App::Config.invoke(self, path: options['path'], exchange: options['exchange'])
       end

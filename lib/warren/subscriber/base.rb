@@ -93,6 +93,16 @@ module Warren
         error 'Dead-letter nacked'
       end
 
+      #
+      # Re-post the message to the delay exchange and acknowledges receipt of
+      # the original message. The delay exchange will return the messages to
+      # the original queue after a delay.
+      #
+      # @param exception [StandardError] The exception that has caused the
+      #                                  message to require a delay
+      #
+      # @return [Void]
+      #
       def delay(exception)
         return dead_letter(exception) if attempt > max_retries
 

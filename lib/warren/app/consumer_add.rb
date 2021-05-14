@@ -7,6 +7,7 @@ module Warren
   module App
     # Handles the initial creation of the configuration object
     class ConsumerAdd
+      # Default namespace for new Subscribers
       SUBSCRIBER_NAMESPACE = 'Warren::Subscriber::'
 
       attr_reader :name, :desc, :queue

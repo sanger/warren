@@ -5,6 +5,10 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+### Added
+
+- Increased documentation
+
 ### Removed
 
 - Warren::Handler::Test and Warren::Handler::Test::Channel no loner respond to
