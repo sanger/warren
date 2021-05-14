@@ -16,9 +16,9 @@ module Warren
     #
     def initialize(channel:, config:)
       @channel = channel
-      @queue_name = config.fetch('name')
-      @queue_options = config.fetch('options')
-      @bindings = config.fetch('bindings')
+      @queue_name = config&.fetch('name')
+      @queue_options = config&.fetch('options')
+      @bindings = config&.fetch('bindings')
     end
 
     def_delegators :channel, :nack, :ack
@@ -45,18 +45,6 @@ module Warren
       establish_bindings!
     end
 
-    #
-    # Post a message to the configured exchange.
-    #
-    # @param payload [String] The message payload
-    # @param routing_key [String] The routing key of the re-sent message
-    # @param headers [Hash] A hash of headers. Typically: { attempts: <Integer> }
-    # @option headers [Integer] :attempts The number of times the message has been processed
-    #
-    # @return [Void]
-    #
-    def publish(payload, routing_key:, headers: {}); end
-
     private
 
     def add_binding(exchange, options)
@@ -70,7 +58,7 @@ module Warren
     def queue
       raise StandardError, 'No queue configured' if @queue_name.nil?
 
-      channel.queue(@queue_name, @queue_options)
+      @queue ||= channel.queue(@queue_name, @queue_options)
     end
 
     def establish_bindings!

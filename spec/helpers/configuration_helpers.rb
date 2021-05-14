@@ -34,12 +34,8 @@ module Configuration
     [
       {
         'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic', durable: true } },
-        # Suggested cop style of %<routing_key_prefix>s but prefer suggesting the simpler option as it
-        # would be all to easy to miss out the 's', resulting in varying behaviour depending on the following
-        # character
-        # rubocop:disable Style/FormatStringToken
-        'options' => { routing_key: '%{routing_key_prefix}.c' }
-        # rubocop:enable Style/FormatStringToken
+        # Match the format we suggest to the user in lib/warren/app/exchange_config.rb
+        'options' => { routing_key: '%{routing_key_prefix}.c' } # rubocop:disable Style/FormatStringToken
       }
     ]
   end
@@ -51,6 +47,19 @@ module Configuration
       'options' => { durable: true, arguments: {} },
       'bindings' => [{
         'exchange' => { 'name' => 'name.dead-letters', 'options' => { type: 'fanout', durable: true } },
+        'options' => {}
+      }]
+    }
+  end
+
+  # Contrary to subscriptions, delay exchanges are exchange based
+  def self.delay_exchange_configuration(exchange_name: 'name.delay', queue_name: 'name.delay')
+    {
+      'exchange' => { 'name' => exchange_name, 'options' => { type: 'fanout', durable: true } },
+      'bindings' => [{
+        'queue' => { 'name' => queue_name, 'options' => {
+          durable: true, arguments: { 'x-dead-letter-exchange' => exchange_name }
+        } },
         'options' => {}
       }]
     }

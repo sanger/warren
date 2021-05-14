@@ -3,6 +3,7 @@
 require 'bunny'
 require 'warren/fox'
 require 'warren/subscription'
+require 'warren/delay_exchange'
 
 module Warren
   # A Den is in charge of creating a Fox from a consumer configuration
@@ -57,10 +58,12 @@ module Warren
       # a per-queue basis. Currently that just means one worker per consumer.
       channel = Warren.handler.new_channel
       subscription = Warren::Subscription.new(channel: channel, config: queue_config)
+      delay = Warren::DelayExchange.new(channel: channel, config: delay_config)
       Warren::Fox.new(name: @app_name,
                       subscription: subscription,
                       adaptor: @adaptor,
-                      subscribed_class: subscribed_class)
+                      subscribed_class: subscribed_class,
+                      delayed: delay)
     end
 
     def queue_config
@@ -72,7 +75,7 @@ module Warren
     end
 
     def delay_config
-      consumer_config.fetch('delay')
+      consumer_config.fetch('delay', nil)
     end
 
     def subscribed_class

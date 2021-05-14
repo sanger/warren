@@ -31,8 +31,9 @@ module Warren
     # @param subscription [Warren::Subscription] Describes the queue to subscribe to
     # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
     # @param subscribed_class [Warren::Subscriber::Base] The class to process received messages
+    # @param delayed [Warren::DelayExchange] The details handling delayed message broadcast
     #
-    def initialize(name:, subscription:, adaptor:, subscribed_class:, delayed: nil)
+    def initialize(name:, subscription:, adaptor:, subscribed_class:, delayed:)
       @consumer_tag = "#{adaptor.env}_#{name}_#{Process.pid}"
       @subscription = subscription
       @delayed = delayed
