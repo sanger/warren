@@ -23,7 +23,7 @@ RSpec.describe Warren::App::ConsumerAdd do
 
     it 'generates a template' do
       expect(shell).to have_received(:template).with('subscriber.tt',
-                                                     'app/warren/subscribers/consumer_name.rb',
+                                                     'app/warren/subscriber/consumer_name.rb',
                                                      context: an_instance_of(Binding))
     end
   end

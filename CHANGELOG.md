@@ -20,6 +20,8 @@ Unreleased section to make new releases easy.
 
 - Messages must now implement {#headers}, although simply returning an empty
   hash is sufficient.
+- Subscriber templates now use the path 'app/warren/subscriber' rather than
+  'app/warren/subscribers' to correctly match class namespacing.
 
 ## [0.2.0]
 

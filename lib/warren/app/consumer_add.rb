@@ -8,7 +8,7 @@ module Warren
     # Handles the initial creation of the configuration object
     class ConsumerAdd
       # Default namespace for new Subscribers
-      SUBSCRIBER_NAMESPACE = 'Warren::Subscriber::'
+      SUBSCRIBER_NAMESPACE = %w[Warren Subscriber].freeze
 
       attr_reader :name, :desc, :queue
 
@@ -71,7 +71,7 @@ module Warren
       def subscribed_class
         class_name = name.split(/[\s\-_]/).map(&:capitalize).join
 
-        "#{SUBSCRIBER_NAMESPACE}#{class_name}"
+        [*SUBSCRIBER_NAMESPACE, class_name].join('::')
       end
 
       def check_name
@@ -120,12 +120,11 @@ module Warren
       end
 
       def write_subscriber
-        @shell.template('subscriber.tt', consumer_path, context: binding)
+        @shell.template('subscriber.tt', subscriber_path, context: binding)
       end
 
-      # @todo Fix subscriber path
-      def consumer_path
-        "app/warren/subscribers/#{@name.tr(' -', '_')}.rb"
+      def subscriber_path
+        "#{['app', *SUBSCRIBER_NAMESPACE, @name.tr(' -', '_')].map(&:downcase).join('/')}.rb"
       end
     end
   end
