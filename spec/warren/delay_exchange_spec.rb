@@ -18,7 +18,8 @@ RSpec.describe Warren::DelayExchange do
   let(:queue_options) do
     {
       durable: true,
-      arguments: { 'x-dead-letter-exchange' => 'exchange_name' }
+      arguments: { 'x-dead-letter-exchange' => '', 'x-message-ttl' => 30_000,
+                   'x-dead-letter-routing-key' => 'queue_name' }
     }
   end
 
@@ -40,6 +41,22 @@ RSpec.describe Warren::DelayExchange do
 
     it 'registers bindings' do
       expect(queue).to have_received(:bind).with(exchange, {})
+    end
+  end
+
+  describe '#publish' do
+    let(:exchange) { instance_spy(Bunny::Exchange) }
+
+    before do
+      allow(channel).to receive(:publish).and_return(channel)
+      delay_exchange.publish('payload', routing_key: 'original_routing_key')
+    end
+
+    it 'sends a message' do
+      expect(channel).to have_received(:publish).with(
+        have_attributes(payload: 'payload', routing_key: 'original_routing_key', headers: {}),
+        exchange: delay_exchange.send(:exchange)
+      )
     end
   end
 end

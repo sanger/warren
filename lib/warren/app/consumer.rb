@@ -32,6 +32,8 @@ module Warren
       option :path, type: :string,
                     default: Warren::Config::Consumers::DEFAULT_PATH,
                     desc: 'The path to the consumer configuration file to generate'
+      option :delay, type: :numeric,
+                     desc: 'The delay (ms) on the delay queue. 0 to skip queue creation.'
       # Invoked by `$ warren consumer add` adds a consumer to the `warren_consumers.yml`
       #
       # @param name [String, nil] Optional: Passed in from Command. The name of the consumer to create.

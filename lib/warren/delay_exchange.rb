@@ -21,8 +21,8 @@ module Warren
     #
     def initialize(channel:, config:)
       @channel = channel
-      @exchange_config = config&.fetch('exchange')
-      @bindings = config&.fetch('bindings')
+      @exchange_config = config&.fetch('exchange', nil)
+      @bindings = config&.fetch('bindings', [])
     end
 
     def_delegators :channel, :nack, :ack
@@ -34,7 +34,7 @@ module Warren
     end
 
     #
-    # Post a message to the configured exchange.
+    # Post a message to the delay exchange.
     #
     # @param payload [String] The message payload
     # @param routing_key [String] The routing key of the re-sent message
@@ -43,9 +43,18 @@ module Warren
     #
     # @return [Void]
     #
-    def publish(payload, routing_key:, headers: {}); end
+    def publish(payload, routing_key:, headers: {})
+      raise StandardError, 'No delay queue configured' unless configured?
+
+      message = Warren::Message::Simple.new(routing_key, payload, headers)
+      channel.publish(message, exchange: exchange)
+    end
 
     private
+
+    def configured?
+      @exchange_config&.key?('name')
+    end
 
     def add_binding(queue, options)
       queue.bind(exchange, options)

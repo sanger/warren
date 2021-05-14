@@ -61,7 +61,7 @@ RSpec.describe Warren::Handler::Broadcast do
 
     describe '#<<' do
       subject(:pushing_a_message) do
-        channel << instance_double(Warren::Message::Short, routing_key: 'key', payload: 'payload')
+        channel << Warren::Message::Simple.new('key', 'payload', {})
       end
 
       before do
@@ -69,7 +69,7 @@ RSpec.describe Warren::Handler::Broadcast do
           .with('exchange', auto_delete: false, durable: true, type: :topic)
           .and_return(bun_exchange)
         allow(bun_exchange).to receive(:publish)
-          .with('payload', routing_key: 'test.key')
+          .with('payload', routing_key: 'test.key', headers: {})
       end
 
       it { is_expected.to eq(channel) } # It allows chaining
@@ -77,7 +77,7 @@ RSpec.describe Warren::Handler::Broadcast do
       it 'publishes the message' do
         pushing_a_message
         expect(bun_exchange).to have_received(:publish)
-          .with('payload', routing_key: 'test.key')
+          .with('payload', routing_key: 'test.key', headers: {})
       end
     end
   end

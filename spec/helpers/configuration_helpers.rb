@@ -17,7 +17,8 @@ module Configuration
       'desc' => 'description',
       'queue' => topic_exchange_queue,
       'dead_letters' => dead_letter_configuration,
-      'subscribed_class' => subscribed_class
+      'subscribed_class' => subscribed_class,
+      'delay' => {}
     }
   end
 
@@ -53,15 +54,26 @@ module Configuration
   end
 
   # Contrary to subscriptions, delay exchanges are exchange based
-  def self.delay_exchange_configuration(exchange_name: 'name.delay', queue_name: 'name.delay')
+  def self.delay_exchange_configuration(exchange_name: 'name.delay', queue_name: 'name.delay', ttl: 30_000)
     {
       'exchange' => { 'name' => exchange_name, 'options' => { type: 'fanout', durable: true } },
       'bindings' => [{
         'queue' => { 'name' => queue_name, 'options' => {
-          durable: true, arguments: { 'x-dead-letter-exchange' => exchange_name }
-        } },
-        'options' => {}
+          durable: true, arguments: {
+            'x-dead-letter-exchange' => '', 'x-message-ttl' => ttl, 'x-dead-letter-routing-key' => 'queue_name'
+          }
+        } }, 'options' => {}
       }]
+    }
+  end
+
+  def self.delay_exchange_consumer(subscribed_class: 'Warren::Subscriber::Name')
+    {
+      'desc' => 'description',
+      'queue' => topic_exchange_queue,
+      'dead_letters' => dead_letter_configuration,
+      'subscribed_class' => subscribed_class,
+      'delay' => delay_exchange_configuration
     }
   end
 end

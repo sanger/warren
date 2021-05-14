@@ -47,6 +47,7 @@ module Warren
         @name = name
         @desc = options[:desc]
         @queue = options[:queue]
+        @delay = options[:delay]
         @config = Warren::Config::Consumers.new(options[:path])
         @bindings = Warren::App::ExchangeConfig.parse(shell, options[:bindings])
       end
@@ -99,6 +100,9 @@ module Warren
         @desc ||= @shell.ask 'Provide an optional description: '
         @queue ||= @shell.ask 'Provide the name of the queue to connect to: '
         @bindings ||= gather_bindings
+        @delay ||= @shell.ask(
+          'Create a delay queue? Specify delay in milliseconds to create; set to 0 or leave blank to skip.'
+        ).to_i
         nil
       end
 
@@ -107,7 +111,11 @@ module Warren
       end
 
       def write_configuration
-        @config.add_consumer(@name, desc: @desc, queue: @queue, bindings: @bindings, subscribed_class: subscribed_class)
+        @config.add_consumer(
+          @name, desc: @desc, queue: @queue,
+                 bindings: @bindings, subscribed_class: subscribed_class,
+                 delay: @delay
+        )
         @config.save
       end
 
@@ -115,6 +123,7 @@ module Warren
         @shell.template('subscriber.tt', consumer_path, context: binding)
       end
 
+      # @todo Fix subscriber path
       def consumer_path
         "app/warren/subscribers/#{@name.tr(' -', '_')}.rb"
       end

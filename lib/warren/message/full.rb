@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Warren
-  # Namespace for Warren message wrappers.
   module Message
     # Generates a payload of an active_record object
     class Full
@@ -33,6 +32,14 @@ module Warren
       # @return [String] The message payload
       def payload
         MultiJson.dump(record)
+      end
+
+      #
+      # For compatibility. Returns an empty hash.
+      #
+      # @return [{}] Empty hash
+      def headers
+        {}
       end
     end
   end

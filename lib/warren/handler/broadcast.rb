@@ -36,16 +36,28 @@ module Warren
         # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
         #
         def <<(message)
-          default_exchange.publish(message.payload, routing_key: key_for(message))
+          publish(message)
+        end
+
+        # Publishes `message` to `exchange` (Defaults to configured exchange)
+        #
+        # @param message [#routing_key,#payload] A message should respond to routing_key and payload.
+        #                                        @see Warren::Message::Full
+        # @param exchange [Bunny::Exchange] The exchange to publish to
+        #
+        # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
+        #
+        def publish(message, exchange: configured_exchange)
+          exchange.publish(message.payload, routing_key: key_for(message), headers: message.headers)
           self
         end
 
         private
 
-        def default_exchange
+        def configured_exchange
           raise StandardError, 'No exchange configured' if @exchange_name.nil?
 
-          @default_exchange ||= exchange(@exchange_name, auto_delete: false, durable: true, type: :topic)
+          @configured_exchange ||= exchange(@exchange_name, auto_delete: false, durable: true, type: :topic)
         end
 
         def key_for(message)

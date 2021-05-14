@@ -9,11 +9,17 @@ Unreleased section to make new releases easy.
 
 - Added support for delay exchanges to process messages after a fixed delay
 - Increased documentation
+- Added Warren::Message::Simple for wrapping just routing key and payload.
 
 ### Removed
 
 - Warren::Handler::Test and Warren::Handler::Test::Channel no loner respond to
   `add_exchange`. These methods were undocumented, and unused internally.
+
+## Changed
+
+- Messages must now implement {#headers}, although simply returning an empty
+  hash is sufficient.
 
 ## [0.2.0]
 

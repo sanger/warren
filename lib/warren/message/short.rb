@@ -54,6 +54,14 @@ module Warren
       def payload
         [@class_name, @id].to_json
       end
+
+      #
+      # For compatibility. Returns an empty hash.
+      #
+      # @return [{}] Empty hash
+      def headers
+        {}
+      end
     end
   end
 end

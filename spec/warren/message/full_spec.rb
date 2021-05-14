@@ -4,15 +4,9 @@ require 'spec_helper'
 require 'multi_json'
 require 'warren/message/full'
 
+# Note this test dependent on ActiveSupport
 RSpec.describe Warren::Message::Full do
   subject(:message) { described_class.new(DummyActiveRecord.new) }
-
-  before do
-    # rubocop:todo RSpec/VerifiedDoubles
-    mock_name = double('name', underscore: 'dummy_active_record', to_s: 'DummyActiveRecord')
-    # rubocop:enable RSpec/VerifiedDoubles
-    allow(DummyActiveRecord).to receive(:name).and_return(mock_name)
-  end
 
   describe '::routing_key' do
     subject { message.routing_key }
@@ -24,5 +18,11 @@ RSpec.describe Warren::Message::Full do
     subject { message.payload }
 
     it { is_expected.to eq '{id:1}' }
+  end
+
+  describe '::headers' do
+    subject { message.headers }
+
+    it { is_expected.to eq({}) }
   end
 end
