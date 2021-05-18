@@ -55,6 +55,7 @@ module Warren
     def run!
       starting!
       subscription.activate! # Set up the queues
+      delayed.activate!
       running!            # Transition to running state
       subscribe!          # Subscribe to the queue
 
@@ -120,7 +121,7 @@ module Warren
       end
     end
 
-    # Cancels the consumer and unregisters it
+    # Cancels the consumer and un-registers it
     def unsubscribe!
       info { 'Unsubscribing' }
       @consumer&.cancel
