@@ -74,7 +74,8 @@ module Warren
           # This smells wrong. I don't like the call back out to the App namespace
           'dead_letters' => queue_config(dead_letter_exchange,
                                          Warren::App::ExchangeConfig.default_dead_letter(dead_letter_exchange)),
-          'delay' => delay_exchange_configuration(ttl: delay, original_queue: queue, consumer_name: name)
+          'delay' => delay_exchange_configuration(ttl: delay, original_queue: queue, consumer_name: name),
+          'worker_count' => 3
         }
       end
       # rubocop:enable Metrics/ParameterLists

@@ -127,9 +127,9 @@ module Warren
         self
       end
 
-      def new_channel
-        Channel.new(session.create_channel(nil, 1), exchange: @exchange_name,
-                                                    routing_key_prefix: @routing_key_prefix)
+      def new_channel(worker_count: 1)
+        Channel.new(session.create_channel(nil, worker_count), exchange: @exchange_name,
+                                                               routing_key_prefix: @routing_key_prefix)
       end
 
       private

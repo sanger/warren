@@ -18,7 +18,8 @@ module Configuration
       'queue' => topic_exchange_queue,
       'dead_letters' => dead_letter_configuration,
       'subscribed_class' => subscribed_class,
-      'delay' => {}
+      'delay' => {},
+      'worker_count' => 3
     }
   end
 
@@ -73,7 +74,8 @@ module Configuration
       'queue' => topic_exchange_queue,
       'dead_letters' => dead_letter_configuration,
       'subscribed_class' => subscribed_class,
-      'delay' => delay_exchange_configuration
+      'delay' => delay_exchange_configuration,
+      'worker_count' => 3
     }
   end
 end

@@ -10,6 +10,7 @@ Unreleased section to make new releases easy.
 - Added support for delay exchanges to process messages after a fixed delay
 - Increased documentation
 - Added Warren::Message::Simple for wrapping just routing key and payload.
+- Added optional worker_count to warren_consumers.yml to control number of worker threads
 
 ### Removed
 
@@ -22,6 +23,7 @@ Unreleased section to make new releases easy.
   hash is sufficient.
 - Subscriber templates now use the path 'app/warren/subscriber' rather than
   'app/warren/subscribers' to correctly match class namespacing.
+- 3 consumer worker threads will be spun up by default
 
 ## [0.2.0]
 
