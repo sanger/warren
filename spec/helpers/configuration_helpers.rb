@@ -55,13 +55,18 @@ module Configuration
   end
 
   # Contrary to subscriptions, delay exchanges are exchange based
-  def self.delay_exchange_configuration(exchange_name: 'name.delay', queue_name: 'name.delay', ttl: 30_000)
+  def self.delay_exchange_configuration(
+    exchange_name: 'name.delay',
+    queue_name: 'name.delay',
+    ttl: 30_000,
+    original_queue: 'queue_name'
+  )
     {
       'exchange' => { 'name' => exchange_name, 'options' => { type: 'fanout', durable: true } },
       'bindings' => [{
         'queue' => { 'name' => queue_name, 'options' => {
           durable: true, arguments: {
-            'x-dead-letter-exchange' => '', 'x-message-ttl' => ttl, 'x-dead-letter-routing-key' => 'queue_name'
+            'x-dead-letter-exchange' => '', 'x-message-ttl' => ttl, 'x-dead-letter-routing-key' => original_queue
           }
         } }, 'options' => {}
       }]

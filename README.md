@@ -104,6 +104,28 @@ These options can be over-ridden in the warren_consumers.yml file if necessary.
 If you wish to completely disable dead-letter queue configuration, such as when
 using policies, then you can set dead_letters to false.
 
+#### Delayed messaged
+
+Warren uses a delay exchange / queue approach for delaying the redelivery of messages.
+We don't currently support the
+[delayed message exchange plugin](https://github.com/rabbitmq/rabbitmq-delayed-message-exchange)
+
+The way this works:
+
+- Consumers with a delay option will automatically register an exchange and a queue
+- By default both of these will be named '<consumer_name>.delay' although you can
+  override this by updating `warren_consumers.yml`
+- The '<consumer_name>.delay' queue will have a time-to-live (ttl) set, after
+  which any messages on the queue will be dead-lettered
+- The dead-letter exchange for this queue is configured to an empty string `''`
+  which corresponds to the 'default exchange', and the routing key is set to
+  match the original queue name.
+- This exchange is a little bit special, and automatically routes messages to
+  any queue on the host where the queue name matches the message routing key.
+
+This approach avoids repeat delivery of the message to any other queues bound
+to the original exchange, and avoids the need for further exchanges or bindings.
+
 ### Running consumers
 
 To run all configure consumers use:

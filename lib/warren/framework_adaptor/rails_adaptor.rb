@@ -2,30 +2,31 @@
 
 module Warren
   # Namespace for framework adaptors.
+  #
   # A FrameworkAdaptor should implement the following instance methods:
   #
-  ## recovered? => Bool
+  # == recovered? => Bool
   # Indicates that any temporary issues (such as database connectivity problems)
   # are resolved and consumers may restart.
   #
-  ## handle
+  # == handle
   #
   # Wraps the processing of each message, is expected to `yield` to allow
   # processing. May be responsible for handling connection pools, and
   # framework-specific exceptions. Raising {Warren::Exceptions::TemporaryIssue}
   # here will cause consumers to sleep until `recovered?` returns true.
   #
-  ## env => String
+  # == env => String
   #
   # Returns the current environment of the application.
   #
-  ## logger => Logger
+  # == logger => Logger
   #
   # Returns your application logger. Is expected to be compatible with the
   # standard library Logger class.
   # @see https://ruby-doc.org/stdlib-2.7.0/libdoc/logger/rdoc/Logger.html
   #
-  ## load_application
+  # == load_application
   #
   # Called upon running `warren consumer start`. Should ensure your application
   # is correctly loaded sufficiently for processing messages

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'warren/message/short'
+require 'warren/message/simple'
 
 RSpec.describe Warren::Message::Simple do
   subject(:message) { described_class.new('routing_key', 'payload') }

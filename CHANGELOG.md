@@ -19,8 +19,9 @@ Unreleased section to make new releases easy.
 
 ## Changed
 
-- Messages must now implement {#headers}, although simply returning an empty
+- Messages must now implement `#headers`, although simply returning an empty
   hash is sufficient.
+  See {Warren::Message::Simple#headers} for example
 - Subscriber templates now use the path 'app/warren/subscriber' rather than
   'app/warren/subscribers' to correctly match class namespacing.
 - 3 consumer worker threads will be spun up by default

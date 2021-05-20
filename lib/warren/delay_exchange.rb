@@ -13,7 +13,7 @@ module Warren
     attr_reader :channel
 
     #
-    # Great a new delay exchange. Handles queue creation, binding and attaching
+    # Create a new delay exchange. Handles queue creation, binding and attaching
     # consumers to the queues
     #
     # @param channel [Warren::Handler::Broadcast::Channel] A channel on which to register queues
