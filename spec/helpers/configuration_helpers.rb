@@ -17,7 +17,9 @@ module Configuration
       'desc' => 'description',
       'queue' => topic_exchange_queue,
       'dead_letters' => dead_letter_configuration,
-      'subscribed_class' => subscribed_class
+      'subscribed_class' => subscribed_class,
+      'delay' => {},
+      'worker_count' => 3
     }
   end
 
@@ -34,12 +36,8 @@ module Configuration
     [
       {
         'exchange' => { 'name' => 'exchange_name', 'options' => { type: 'topic', durable: true } },
-        # Suggested cop style of %<routing_key_prefix>s but prefer suggesting the simpler option as it
-        # would be all to easy to miss out the 's', resulting in varying behaviour depending on the following
-        # character
-        # rubocop:disable Style/FormatStringToken
-        'options' => { routing_key: '%{routing_key_prefix}.c' }
-        # rubocop:enable Style/FormatStringToken
+        # Match the format we suggest to the user in lib/warren/app/exchange_config.rb
+        'options' => { routing_key: '%{routing_key_prefix}.c' } # rubocop:disable Style/FormatStringToken
       }
     ]
   end
@@ -53,6 +51,36 @@ module Configuration
         'exchange' => { 'name' => 'name.dead-letters', 'options' => { type: 'fanout', durable: true } },
         'options' => {}
       }]
+    }
+  end
+
+  # Contrary to subscriptions, delay exchanges are exchange based
+  def self.delay_exchange_configuration(
+    exchange_name: 'name.delay',
+    queue_name: 'name.delay',
+    ttl: 30_000,
+    original_queue: 'queue_name'
+  )
+    {
+      'exchange' => { 'name' => exchange_name, 'options' => { type: 'fanout', durable: true } },
+      'bindings' => [{
+        'queue' => { 'name' => queue_name, 'options' => {
+          durable: true, arguments: {
+            'x-dead-letter-exchange' => '', 'x-message-ttl' => ttl, 'x-dead-letter-routing-key' => original_queue
+          }
+        } }, 'options' => {}
+      }]
+    }
+  end
+
+  def self.delay_exchange_consumer(subscribed_class: 'Warren::Subscriber::Name')
+    {
+      'desc' => 'description',
+      'queue' => topic_exchange_queue,
+      'dead_letters' => dead_letter_configuration,
+      'subscribed_class' => subscribed_class,
+      'delay' => delay_exchange_configuration,
+      'worker_count' => 3
     }
   end
 end

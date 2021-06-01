@@ -16,9 +16,9 @@ module Warren
     #
     def initialize(channel:, config:)
       @channel = channel
-      @queue_name = config.fetch('name')
-      @queue_options = config.fetch('options')
-      @bindings = config.fetch('bindings')
+      @queue_name = config&.fetch('name')
+      @queue_options = config&.fetch('options')
+      @bindings = config&.fetch('bindings')
     end
 
     def_delegators :channel, :nack, :ack
@@ -58,7 +58,7 @@ module Warren
     def queue
       raise StandardError, 'No queue configured' if @queue_name.nil?
 
-      channel.queue(@queue_name, @queue_options)
+      @queue ||= channel.queue(@queue_name, @queue_options)
     end
 
     def establish_bindings!

@@ -15,7 +15,7 @@ module Warren
       # Creates the callback object
       #
       # @param handler [Warren::Handler] The handler to take the messaged
-      # @param message_class [Warren::Message] The adpater to render the messages
+      # @param message_class [Warren::Message] The adaptor to render the messages
       #
       def initialize(handler:, message_class: Warren::Message::Short)
         @handler = handler

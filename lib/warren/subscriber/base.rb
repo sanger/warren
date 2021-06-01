@@ -24,7 +24,8 @@ module Warren
       # delegators (Supplied by Forwardable)
       # Essentially syntax is:
       # def_delegators <target>, *<methods_to_delegate>
-      def_delegators :fox, :subscription, :warn, :info, :error, :debug
+      def_delegators :fox, :subscription, :warn, :info, :error, :debug, :delayed
+      def_delegators :delivery_info, :routing_key, :delivery_tag
 
       #
       # Construct a basic subscriber for each received message. Call {#process}
@@ -69,6 +70,8 @@ module Warren
         warn "Re-queue: #{payload}"
         warn "Re-queue Exception: #{exception.message}"
         raise_if_acknowledged
+        # nack arguments: delivery_tag, multiple, requeue
+        # http://reference.rubybunny.info/Bunny/Channel.html#nack-instance_method
         subscription.nack(delivery_tag, false, true)
         @acknowledged = true
         warn 'Re-queue nacked'
@@ -90,16 +93,41 @@ module Warren
         error 'Dead-letter nacked'
       end
 
+      #
+      # Re-post the message to the delay exchange and acknowledges receipt of
+      # the original message. The delay exchange will return the messages to
+      # the original queue after a delay.
+      #
+      # @param exception [StandardError] The exception that has caused the
+      #                                  message to require a delay
+      #
+      # @return [Void]
+      #
+      def delay(exception)
+        return dead_letter(exception) if attempt > max_retries
+
+        warn "Delay: #{payload}"
+        warn "Delay Exception: #{exception.message}"
+        # Publish the message to the delay queue
+        delayed.publish(payload, routing_key: routing_key, headers: { attempts: attempt + 1 })
+        # Acknowledge the original message
+        ack
+      end
+
       private
+
+      def max_retries
+        30
+      end
+
+      def attempt
+        headers.fetch('attempts', 0)
+      end
 
       def headers
         # Annoyingly it appears that a message with no headers
         # returns nil, not an empty hash
         properties.headers || {}
-      end
-
-      def delivery_tag
-        delivery_info.delivery_tag
       end
 
       # Acknowledge the message as successfully processed.

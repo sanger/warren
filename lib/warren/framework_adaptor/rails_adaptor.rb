@@ -1,6 +1,36 @@
 # frozen_string_literal: true
 
 module Warren
+  # Namespace for framework adaptors.
+  #
+  # A FrameworkAdaptor should implement the following instance methods:
+  #
+  # == recovered? => Bool
+  # Indicates that any temporary issues (such as database connectivity problems)
+  # are resolved and consumers may restart.
+  #
+  # == handle
+  #
+  # Wraps the processing of each message, is expected to `yield` to allow
+  # processing. May be responsible for handling connection pools, and
+  # framework-specific exceptions. Raising {Warren::Exceptions::TemporaryIssue}
+  # here will cause consumers to sleep until `recovered?` returns true.
+  #
+  # == env => String
+  #
+  # Returns the current environment of the application.
+  #
+  # == logger => Logger
+  #
+  # Returns your application logger. Is expected to be compatible with the
+  # standard library Logger class.
+  # @see https://ruby-doc.org/stdlib-2.7.0/libdoc/logger/rdoc/Logger.html
+  #
+  # == load_application
+  #
+  # Called upon running `warren consumer start`. Should ensure your application
+  # is correctly loaded sufficiently for processing messages
+  #
   module FrameworkAdaptor
     # The RailsAdaptor provides error handling and application
     # loading for Rails applications
@@ -33,6 +63,11 @@ module Warren
         end
       end
 
+      #
+      # Checks that the database has recovered to allow message processing
+      #
+      # @return [Bool] Returns true if the application has recovered
+      #
       def recovered?
         ActiveRecord::Base.connection.reconnect!
         true
@@ -40,6 +75,14 @@ module Warren
         false
       end
 
+      #
+      # Checks ensures a database connection has been checked out before
+      # yielding to allow message processing. Rescues loss of the database
+      # connection and raises {Warren::Exceptions::TemporaryIssue} to send
+      # the consumers to sleep until it recovers.
+      #
+      # @return [Void]
+      #
       def handle
         with_connection do
           yield
@@ -60,14 +103,23 @@ module Warren
         ActiveRecord::Base.clear_active_connections!
       end
 
+      # Returns the rails environment
+      #
+      # @return [ActiveSupport::StringInquirer] The rails environment
       def env
         Rails.env
       end
 
+      # Returns the configured logger
+      #
+      # @return [Logger,ActiveSupport::Logger,...] The application logger
       def logger
         Rails.logger
       end
 
+      # Triggers full loading of the rails application and dependencies
+      #
+      # @return [Void]
       def load_application
         $stdout.puts 'Loading application...'
         require './config/environment'

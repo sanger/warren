@@ -17,4 +17,10 @@ RSpec.describe Warren::Message::Short do
 
     it { is_expected.to eq '["DummyActiveRecord",1]' }
   end
+
+  describe '::headers' do
+    subject { message.headers }
+
+    it { is_expected.to eq({}) }
+  end
 end

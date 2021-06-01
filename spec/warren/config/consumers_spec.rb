@@ -31,23 +31,48 @@ RSpec.describe Warren::Config::Consumers do
   end
 
   describe '#add_consumer' do
-    subject(:add_consumer) do
-      consumers.add_consumer('name', desc: 'description', queue: 'queue_name',
-                                     bindings: Configuration.topic_exchange_bindings,
-                                     subscribed_class: 'Warren::Subscriber::Name')
+    context 'with no delay exchange' do
+      subject(:add_consumer) do
+        consumers.add_consumer('name', desc: 'description', queue: 'queue_name',
+                                       bindings: Configuration.topic_exchange_bindings,
+                                       subscribed_class: 'Warren::Subscriber::Name',
+                                       delay: 0)
+      end
+
+      let(:expected_config) do
+        Configuration.topic_exchange_consumer
+      end
+
+      it 'returns a consumer config hash' do
+        expect(add_consumer).to eq(expected_config)
+      end
+
+      it 'registers the consumer' do
+        add_consumer
+        expect(consumers.consumer_exist?('name')).to be true
+      end
     end
 
-    let(:expected_config) do
-      Configuration.topic_exchange_consumer
-    end
+    context 'with a delay exchange' do
+      subject(:add_consumer) do
+        consumers.add_consumer('name', desc: 'description', queue: 'queue_name',
+                                       bindings: Configuration.topic_exchange_bindings,
+                                       subscribed_class: 'Warren::Subscriber::Name',
+                                       delay: 30_000)
+      end
 
-    it 'returns a consumer config hash' do
-      expect(add_consumer).to eq(expected_config)
-    end
+      let(:expected_config) do
+        Configuration.delay_exchange_consumer
+      end
 
-    it 'registers the consumer' do
-      add_consumer
-      expect(consumers.consumer_exist?('name')).to be true
+      it 'returns a consumer config hash' do
+        expect(add_consumer).to eq(expected_config)
+      end
+
+      it 'registers the consumer' do
+        add_consumer
+        expect(consumers.consumer_exist?('name')).to be true
+      end
     end
   end
 
@@ -63,7 +88,7 @@ RSpec.describe Warren::Config::Consumers do
       allow(File).to receive(:open).with(path, 'w').and_yield(file)
       consumers.add_consumer('name', desc: 'description', queue: 'queue_name',
                                      bindings: Configuration.topic_exchange_bindings,
-                                     subscribed_class: 'Warren::Subscriber::Name')
+                                     subscribed_class: 'Warren::Subscriber::Name', delay: 0)
       consumers.save
     end
 

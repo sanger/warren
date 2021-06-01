@@ -5,6 +5,27 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+### Added
+
+- Added support for delay exchanges to process messages after a fixed delay
+- Increased documentation
+- Added Warren::Message::Simple for wrapping just routing key and payload.
+- Added optional worker_count to warren_consumers.yml to control number of worker threads
+
+### Removed
+
+- Warren::Handler::Test and Warren::Handler::Test::Channel no loner respond to
+  `add_exchange`. These methods were undocumented, and unused internally.
+
+## Changed
+
+- Messages must now implement `#headers`, although simply returning an empty
+  hash is sufficient.
+  See {Warren::Message::Simple#headers} for example
+- Subscriber templates now use the path 'app/warren/subscriber' rather than
+  'app/warren/subscribers' to correctly match class namespacing.
+- 3 consumer worker threads will be spun up by default
+
 ## [0.2.0]
 
 ### Added

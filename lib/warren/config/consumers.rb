@@ -60,10 +60,12 @@ module Warren
       # @param desc [String] Description of the consumer (Primarily for documentation)
       # @param queue [String] Name of the queue to attach to
       # @param bindings [Array<Hash>] Array of binding configuration hashed
+      # @param delay [Integer] Delay on the generated delay exchange
       #
       # @return [Hash] The consumer configuration hash
       #
-      def add_consumer(name, desc:, queue:, bindings:, subscribed_class:)
+      # rubocop:todo Metrics/ParameterLists
+      def add_consumer(name, desc:, queue:, bindings:, subscribed_class:, delay:)
         dead_letter_exchange = "#{name}.dead-letters"
         @config[name] = {
           'desc' => desc,
@@ -71,9 +73,12 @@ module Warren
           'subscribed_class' => subscribed_class,
           # This smells wrong. I don't like the call back out to the App namespace
           'dead_letters' => queue_config(dead_letter_exchange,
-                                         Warren::App::ExchangeConfig.default_dead_letter(dead_letter_exchange))
+                                         Warren::App::ExchangeConfig.default_dead_letter(dead_letter_exchange)),
+          'delay' => delay_exchange_configuration(ttl: delay, original_queue: queue, consumer_name: name),
+          'worker_count' => 3
         }
       end
+      # rubocop:enable Metrics/ParameterLists
 
       private
 
@@ -85,6 +90,23 @@ module Warren
           'bindings' => bindings
         }
       end
+
+      # rubocop:todo Metrics/MethodLength
+      def delay_exchange_configuration(ttl:, original_queue:, consumer_name:)
+        return {} if ttl.nil? || ttl.zero?
+
+        {
+          'exchange' => { 'name' => "#{consumer_name}.delay", 'options' => { type: 'fanout', durable: true } },
+          'bindings' => [{
+            'queue' => { 'name' => "#{consumer_name}.delay", 'options' => {
+              durable: true, arguments: {
+                'x-dead-letter-exchange' => '', 'x-message-ttl' => ttl, 'x-dead-letter-routing-key' => original_queue
+              }
+            } }, 'options' => {}
+          }]
+        }
+      end
+      # rubocop:enable Metrics/MethodLength
 
       #
       # Loads the configuration, should be a hash

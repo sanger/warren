@@ -7,7 +7,8 @@ module Warren
   module App
     # Handles the initial creation of the configuration object
     class ConsumerAdd
-      SUBSCRIBER_NAMESPACE = 'Warren::Subscriber::'
+      # Default namespace for new Subscribers
+      SUBSCRIBER_NAMESPACE = %w[Warren Subscriber].freeze
 
       attr_reader :name, :desc, :queue
 
@@ -46,6 +47,7 @@ module Warren
         @name = name
         @desc = options[:desc]
         @queue = options[:queue]
+        @delay = options[:delay]
         @config = Warren::Config::Consumers.new(options[:path])
         @bindings = Warren::App::ExchangeConfig.parse(shell, options[:bindings])
       end
@@ -69,7 +71,7 @@ module Warren
       def subscribed_class
         class_name = name.split(/[\s\-_]/).map(&:capitalize).join
 
-        "#{SUBSCRIBER_NAMESPACE}#{class_name}"
+        [*SUBSCRIBER_NAMESPACE, class_name].join('::')
       end
 
       def check_name
@@ -98,6 +100,9 @@ module Warren
         @desc ||= @shell.ask 'Provide an optional description: '
         @queue ||= @shell.ask 'Provide the name of the queue to connect to: '
         @bindings ||= gather_bindings
+        @delay ||= @shell.ask(
+          'Create a delay queue? Specify delay in milliseconds to create; set to 0 or leave blank to skip.'
+        ).to_i
         nil
       end
 
@@ -106,16 +111,20 @@ module Warren
       end
 
       def write_configuration
-        @config.add_consumer(@name, desc: @desc, queue: @queue, bindings: @bindings, subscribed_class: subscribed_class)
+        @config.add_consumer(
+          @name, desc: @desc, queue: @queue,
+                 bindings: @bindings, subscribed_class: subscribed_class,
+                 delay: @delay
+        )
         @config.save
       end
 
       def write_subscriber
-        @shell.template('subscriber.tt', consumer_path, context: binding)
+        @shell.template('subscriber.tt', subscriber_path, context: binding)
       end
 
-      def consumer_path
-        "app/warren/subscribers/#{@name.tr(' -', '_')}.rb"
+      def subscriber_path
+        "#{['app', *SUBSCRIBER_NAMESPACE, @name.tr(' -', '_')].map(&:downcase).join('/')}.rb"
       end
     end
   end

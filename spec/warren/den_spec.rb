@@ -31,6 +31,9 @@ RSpec.describe Warren::Den do
         channel: channel,
         config: Configuration.dead_letter_configuration
       ).and_return(subscription)
+      handler = instance_spy(Warren::Handler::Broadcast)
+      allow(handler).to receive(:with_channel).and_yield(channel)
+      allow(Warren).to receive(:handler).and_return(handler)
     end
 
     it 'activates a subscription' do

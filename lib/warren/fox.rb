@@ -20,7 +20,7 @@ module Warren
     # Maximum wait time between database retries: 5 minutes
     MAX_RECONNECT_DELAY = 60 * 5
 
-    attr_reader :state, :subscription, :consumer_tag
+    attr_reader :state, :subscription, :consumer_tag, :delayed
 
     #
     # Creates a fox, a RabbitMQ consumer.
@@ -30,10 +30,13 @@ module Warren
     # @param name [String] The name of the consumer
     # @param subscription [Warren::Subscription] Describes the queue to subscribe to
     # @param adaptor [#recovered?,#handle,#env] An adaptor to handle framework specifics
+    # @param subscribed_class [Warren::Subscriber::Base] The class to process received messages
+    # @param delayed [Warren::DelayExchange] The details handling delayed message broadcast
     #
-    def initialize(name:, subscription:, adaptor:, subscribed_class:)
+    def initialize(name:, subscription:, adaptor:, subscribed_class:, delayed:)
       @consumer_tag = "#{adaptor.env}_#{name}_#{Process.pid}"
       @subscription = subscription
+      @delayed = delayed
       @logger = Warren::LogTagger.new(logger: adaptor.logger, tag: "#{FOX} #{@consumer_tag}")
       @adaptor = adaptor
       @subscribed_class = subscribed_class
@@ -52,6 +55,7 @@ module Warren
     def run!
       starting!
       subscription.activate! # Set up the queues
+      delayed.activate!
       running!            # Transition to running state
       subscribe!          # Subscribe to the queue
 
@@ -117,7 +121,7 @@ module Warren
       end
     end
 
-    # Cancels the consumer and unregisters it
+    # Cancels the consumer and un-registers it
     def unsubscribe!
       info { 'Unsubscribing' }
       @consumer&.cancel

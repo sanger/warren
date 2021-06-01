@@ -77,12 +77,15 @@ module Warren
           @warren = warren
         end
 
+        # Records `message` for testing purposes
+        #
+        # @param message [#routing_key,#payload] A message should respond to routing_key and payload.
+        #                                        @see Warren::Message::Full
+        #
+        # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
+        #
         def <<(message)
           @warren << message
-        end
-
-        def add_exchange(name, options)
-          @warren.add_exchange(name, options)
         end
       end
 
@@ -183,10 +186,6 @@ module Warren
       # Disable message logging if not required
       def <<(message)
         @messages << message if @enabled
-      end
-
-      def add_exchange(name, options)
-        @exchanges << [name, options] if @enabled
       end
 
       private

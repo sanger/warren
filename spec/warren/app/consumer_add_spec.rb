@@ -13,7 +13,8 @@ RSpec.describe Warren::App::ConsumerAdd do
       expect(consumer_config).to have_received(:add_consumer)
         .with('consumer_name', desc: 'my consumer', queue: 'queue_name',
                                bindings: Configuration.topic_exchange_bindings,
-                               subscribed_class: 'Warren::Subscriber::ConsumerName')
+                               subscribed_class: 'Warren::Subscriber::ConsumerName',
+                               delay: 100)
     end
 
     it 'saves the configuration' do
@@ -22,7 +23,7 @@ RSpec.describe Warren::App::ConsumerAdd do
 
     it 'generates a template' do
       expect(shell).to have_received(:template).with('subscriber.tt',
-                                                     'app/warren/subscribers/consumer_name.rb',
+                                                     'app/warren/subscriber/consumer_name.rb',
                                                      context: an_instance_of(Binding))
     end
   end
@@ -39,8 +40,6 @@ RSpec.describe Warren::App::ConsumerAdd do
                                                          .and_return(true)
       allow(consumer_config).to receive(:consumer_exist?).with('consumer_name')
                                                          .and_return(false)
-      allow(consumer_config).to receive(:add_consumer)
-      allow(consumer_config).to receive(:save)
     end
 
     context 'with a clashing consumer name' do
@@ -50,7 +49,8 @@ RSpec.describe Warren::App::ConsumerAdd do
                                { path: path, desc: 'my consumer',
                                  # Match the format we suggest to the user in lib/warren/app/exchange_config.rb
                                  # rubocop:disable Style/FormatStringToken
-                                 queue: 'queue_name', bindings: ['topic:exchange_name:%{routing_key_prefix}.c'] })
+                                 queue: 'queue_name', bindings: ['topic:exchange_name:%{routing_key_prefix}.c'],
+                                 delay: 100 })
         # rubocop:enable Style/FormatStringToken
       end
 
@@ -83,6 +83,9 @@ RSpec.describe Warren::App::ConsumerAdd do
         allow(Warren::App::ExchangeConfig).to receive(:ask)
           .with(shell)
           .and_return(Configuration.topic_exchange_bindings)
+        allow(shell).to receive(:ask).with(
+          'Create a delay queue? Specify delay in milliseconds to create; set to 0 or leave blank to skip.'
+        ).and_return('100')
         invocation
       end
 
@@ -98,6 +101,12 @@ RSpec.describe Warren::App::ConsumerAdd do
         expect(shell).to have_received(:ask).with('Provide the name of the queue to connect to: ')
       end
 
+      it 'prompts for delay-queue' do
+        expect(shell).to have_received(:ask).with(
+          'Create a delay queue? Specify delay in milliseconds to create; set to 0 or leave blank to skip.'
+        )
+      end
+
       it 'prompts for bindings' do
         expect(Warren::App::ExchangeConfig).to have_received(:ask).with(shell)
       end
@@ -111,15 +120,13 @@ RSpec.describe Warren::App::ConsumerAdd do
                                { path: path, desc: 'my consumer',
                                  # Match the format we suggest to the user in lib/warren/app/exchange_config.rb
                                  # rubocop:disable Style/FormatStringToken
-                                 queue: 'queue_name', bindings: ['topic:exchange_name:%{routing_key_prefix}.c'] })
-        # rubocop:enable Style/FormatStringToken
+                                 queue: 'queue_name', bindings: ['topic:exchange_name:%{routing_key_prefix}.c'],
+                                 # rubocop:enable Style/FormatStringToken
+                                 delay: 100 })
       end
 
       before do
-        allow(shell).to receive(:ask).with('Specify a consumer name: ')
-        allow(shell).to receive(:ask).with('Provide an optional description: ')
-        allow(shell).to receive(:ask).with('Provide the name of the queue to connect to: ')
-        allow(Warren::App::ExchangeConfig).to receive(:ask).with(shell)
+        allow(Warren::App::ExchangeConfig).to receive(:ask)
         invocation
       end
 
@@ -136,7 +143,11 @@ RSpec.describe Warren::App::ConsumerAdd do
       end
 
       it 'does not prompt for bindings' do
-        expect(Warren::App::ExchangeConfig).not_to have_received(:ask).with(shell)
+        expect(Warren::App::ExchangeConfig).not_to have_received(:ask)
+      end
+
+      it 'does not prompt for delay-queue' do
+        expect(shell).not_to have_received(:yes?).with('Do you require a message delay queue?')
       end
 
       it_behaves_like 'a consumer addition'

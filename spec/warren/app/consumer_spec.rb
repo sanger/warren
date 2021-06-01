@@ -27,14 +27,16 @@ RSpec.describe Warren::App::Consumer do
 
     context 'with arguments' do
       let(:arguments) do
-        ['consumer_name', '--path=tmp/path', '--desc=my_exchange', '--queue=queue_name', '--bindings=a', 'b', 'c']
+        ['consumer_name', '--path=tmp/path', '--desc=my_exchange', '--queue=queue_name', '--bindings=a', 'b', 'c',
+         '--delay=0']
       end
 
       it 'invokes Warren::App:Config with supplied arguments' do
         expect(Warren::App::ConsumerAdd).to have_received(:invoke)
           .with(a_thor_shell, 'consumer_name',
                 { queue: 'queue_name', bindings: %w[a b c],
-                  path: 'tmp/path', desc: 'my_exchange' })
+                  path: 'tmp/path', desc: 'my_exchange',
+                  delay: 0 })
       end
     end
   end
