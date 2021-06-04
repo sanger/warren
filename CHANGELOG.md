@@ -5,6 +5,8 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+## [0.3.0] - 2021-06-04
+
 ### Added
 
 - Added support for delay exchanges to process messages after a fixed delay
