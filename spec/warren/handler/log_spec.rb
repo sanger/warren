@@ -5,12 +5,12 @@ require 'bunny'
 require 'warren/handler/broadcast'
 
 RSpec.describe Warren::Handler::Log do
-  let(:logger) do
-    spy('logger')
-  end
-
   subject(:handler) do
     described_class.new(logger: logger, routing_key_prefix: 'test')
+  end
+
+  let(:logger) do
+    spy('logger') # rubocop:todo RSpec/VerifiedDoubles
   end
 
   describe '#connect' do
@@ -31,11 +31,11 @@ RSpec.describe Warren::Handler::Log do
     describe '#<<' do
       subject { channel << message }
 
-      let(:message) { double('message', routing_key: 'key', payload: 'payload') }
+      let(:message) { double('message', routing_key: 'key', payload: 'payload') } # rubocop:todo RSpec/VerifiedDoubles
 
       it { is_expected.to be_a(described_class) }
 
-      it 'logs the messages' do
+      it 'logs the messages' do # rubocop:todo RSpec/MultipleExpectations
         channel << message
         expect(logger).to have_received(:info).with('Published: key')
         expect(logger).to have_received(:debug).with('Payload: payload')

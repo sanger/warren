@@ -14,7 +14,7 @@ RSpec.describe Warren::Callback do
   end
 
   before do
-    mock_name = double('name', underscore: 'dummy_active_record')
+    mock_name = double('name', underscore: 'dummy_active_record') # rubocop:todo RSpec/VerifiedDoubles
     allow(broadcast_class).to receive(:name).and_return(mock_name)
   end
 

@@ -3,6 +3,8 @@
 require 'simplecov'
 SimpleCov.start
 
+ENV['RACK_ENV'] ||= 'test'
+
 require 'bundler/setup'
 require 'warren'
 require 'pry'
@@ -18,10 +20,3 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
-
-# Dummy Rails to get tests working prior to refactor
-# module Rails
-#   def self.env
-#     'test'
-#   end
-# end

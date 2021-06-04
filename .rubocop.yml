@@ -8,14 +8,20 @@
 # where the inspected file is and continue its way up to the root directory.
 #
 # See https://docs.rubocop.org/rubocop/configuration
+require:
+  - rubocop-rake
+  - rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 2.6
+  NewCops: enable
 # Blocks are used to structure tests and are part of the shoulda dsl.
 # The standard BlockLength limits are too stringent for this purpose.
-# Block DSL is also used in routes
-# We should be careful keeping rake tasks here, as large tasks are still an issue.
-# Not sure if we need to split namespaces across several files though.
-# We exclude builders, as they are concerned with rendering xml
+# We also disable it for the gemspec, as while its using new, its more like
+# a DSL in nature
 Metrics/BlockLength:
-  ExcludedMethods:
+  Exclude:
+  - '*.gemspec'
+  IgnoredMethods:
    - describe
+   - context

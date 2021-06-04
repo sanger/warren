@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require 'bunny'
+require 'forwardable'
+require 'connection_pool'
+require_relative 'base'
 
 module Warren
   module Handler
@@ -8,36 +11,60 @@ module Warren
     # Class Warren::Broadcast provides a connection pool of
     # threadsafe RabbitMQ channels for broadcasting messages
     #
-    class Broadcast
-      # Wraps a {Bunny::Channel}
+    class Broadcast < Warren::Handler::Base
+      # Wraps a Bunny::Channel
+      # @see https://rubydoc.info/gems/bunny/Bunny/Channel
       class Channel
-        def initialize(bun_channel, routing_key_template:, exchange: nil)
+        extend Forwardable
+
+        attr_reader :routing_key_prefix
+
+        def_delegators :@bun_channel, :close, :exchange, :queue, :prefetch, :ack, :nack
+
+        def initialize(bun_channel, routing_key_prefix:, exchange: nil)
           @bun_channel = bun_channel
           @exchange_name = exchange
-          @routing_key_template = routing_key_template
+          @routing_key_prefix = routing_key_prefix
+          @routing_key_template = Handler.routing_key_template(routing_key_prefix)
         end
 
+        # Publishes `message` to the configured exchange
+        #
+        # @param message [#routing_key,#payload] A message should respond to routing_key and payload.
+        #                                        @see Warren::Message::Full
+        #
+        # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
+        #
         def <<(message)
-          exchange.publish(message.payload, routing_key: key_for(message))
-          self
+          publish(message)
         end
 
-        def close
-          @bun_channel.close
+        # Publishes `message` to `exchange` (Defaults to configured exchange)
+        #
+        # @param message [#routing_key,#payload] A message should respond to routing_key and payload.
+        #                                        @see Warren::Message::Full
+        # @param exchange [Bunny::Exchange] The exchange to publish to
+        #
+        # @return [Warren::Handler::Broadcast::Channel] returns self for chaining
+        #
+        def publish(message, exchange: configured_exchange)
+          exchange.publish(message.payload, routing_key: key_for(message), headers: message.headers)
+          self
         end
 
         private
 
-        def exchange
+        def configured_exchange
           raise StandardError, 'No exchange configured' if @exchange_name.nil?
 
-          @exchange ||= @bun_channel.topic(@exchange_name, auto_delete: false, durable: true)
+          @configured_exchange ||= exchange(@exchange_name, auto_delete: false, durable: true, type: :topic)
         end
 
         def key_for(message)
           @routing_key_template % message.routing_key
         end
       end
+
       #
       # Creates a warren but does not connect.
       #
@@ -47,10 +74,11 @@ module Warren
       # @param [String,nil] routing_key_prefix The prefix to pass before the routing key.
       #                                        Can be used to ensure environments remain distinct.
       def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14)
+        super()
         @server = server
         @exchange_name = exchange
         @pool_size = pool_size
-        @routing_key_template = Handler.routing_key_template(routing_key_prefix)
+        @routing_key_prefix = routing_key_prefix
       end
 
       #
@@ -74,12 +102,12 @@ module Warren
       end
 
       #
-      # Yields an exchange which gets returned to the pool on block closure
-      #
+      # Yields an {Warren::Handler::Broadcast::Channel} which gets returned to the pool on block closure
       #
       # @return [void]
       #
-      # @yieldreturn [Warren::Broadcast::Channel] A rabbitMQ channel that sends messages to the configured exchange
+      # @yieldparam [Warren::Handler::Broadcast::Channel] A rabbitMQ channel that sends messages to the configured
+      #                                                    exchange
       def with_channel(&block)
         connection_pool.with(&block)
       end
@@ -90,7 +118,7 @@ module Warren
       #
       # @param [Warren::Message] message The message to broadcast. Must respond to #routing_key and #payload
       #
-      # @return [Warren::Broadcast] Returns itself to allow chaining. But you're
+      # @return [Warren::Handler::Broadcast] Returns itself to allow chaining. But you're
       #                             probably better off using #with_channel
       #                             in that case
       #
@@ -99,16 +127,24 @@ module Warren
         self
       end
 
+      def new_channel(worker_count: 1)
+        Channel.new(session.create_channel(nil, worker_count), exchange: @exchange_name,
+                                                               routing_key_prefix: @routing_key_prefix)
+      end
+
       private
 
+      def server_connection
+        ENV.fetch('WARREN_CONNECTION_URI', @server)
+      end
+
       def session
-        @session ||= Bunny.new(@server)
+        @session ||= Bunny.new(server_connection)
       end
 
       def connection_pool
         @connection_pool ||= start_session && ConnectionPool.new(size: @pool_size, timeout: 5) do
-          Channel.new(session.create_channel, exchange: @exchange_name,
-                                              routing_key_template: @routing_key_template)
+          new_channel
         end
       end
 

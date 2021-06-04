@@ -3,6 +3,9 @@
 # When testing the ActiveRecord integrations we want a class that mimics some
 # of the functionality of ActiveRecord::Base
 class DummyActiveRecord
+  # Include our callback methods
+  include Warren::Callback
+
   attr_reader :id, :association
 
   def self.after_commit(args)
@@ -10,10 +13,6 @@ class DummyActiveRecord
   end
 
   def self.after_save(args); end
-
-  def self.name
-    'DummyActiveRecord'
-  end
 
   def to_json(_)
     '{id:1}'
