@@ -22,7 +22,7 @@ module Warren
     def initialize(channel:, config:)
       @channel = channel
       @exchange_config = config&.fetch('exchange', nil)
-      @bindings = config&.fetch('bindings', [])
+      @bindings = config&.fetch('bindings', []) || []
     end
 
     def_delegators :channel, :nack, :ack

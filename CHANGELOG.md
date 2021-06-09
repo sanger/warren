@@ -5,6 +5,12 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+## [0.4.0] - 2021-06-09
+
+### Fixed
+
+- Ensured backwards compatibility with 0.2.0
+
 ## [0.3.0] - 2021-06-04
 
 ### Added
