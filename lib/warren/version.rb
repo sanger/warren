@@ -2,5 +2,5 @@
 
 module Warren
   # Gem version number. Bump prior to release of new version
-  VERSION = '0.4.0'
+  VERSION = '0.4.1'
 end
