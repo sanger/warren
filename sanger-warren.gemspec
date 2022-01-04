@@ -32,8 +32,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # Dependencies
-  spec.add_runtime_dependency 'bunny', '~> 2.17.0'
-  spec.add_runtime_dependency 'connection_pool', '~> 2.2.0'
+  spec.add_runtime_dependency 'bunny', '~> 2.17'
+  spec.add_runtime_dependency 'connection_pool', '~> 2.2'
   spec.add_runtime_dependency 'multi_json', '~> 1.0'
-  spec.add_runtime_dependency 'thor', '~> 1.1.0'
+  spec.add_runtime_dependency 'thor', '~> 1.1'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 end

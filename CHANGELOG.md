@@ -5,6 +5,12 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+## [0.4.1] - 2022-01-04
+
+## Changed
+
+- Relaxed version constraints on dependencies
+
 ## [0.4.0] - 2021-06-09
 
 ### Fixed
