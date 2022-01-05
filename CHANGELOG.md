@@ -7,7 +7,7 @@ Unreleased section to make new releases easy.
 
 ## [0.4.1] - 2022-01-04
 
-## Changed
+### Changed
 
 - Relaxed version constraints on dependencies
 
@@ -31,7 +31,7 @@ Unreleased section to make new releases easy.
 - Warren::Handler::Test and Warren::Handler::Test::Channel no loner respond to
   `add_exchange`. These methods were undocumented, and unused internally.
 
-## Changed
+### Changed
 
 - Messages must now implement `#headers`, although simply returning an empty
   hash is sufficient.
