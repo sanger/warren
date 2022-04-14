@@ -5,6 +5,10 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+### Changed
+
+- The WARREN_TYPE environmental variable can now fully replace the config yaml
+
 ## [0.4.1] - 2022-01-04
 
 ### Changed

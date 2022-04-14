@@ -29,7 +29,7 @@ module Warren
   #
   # @return [Warren::Handler::Base] Exact class determined by the type passed in
   #
-  def self.construct(type:, config: {})
+  def self.construct(type: 'UNSPECIFIED', config: {})
     warren_type = ENV.fetch(WARREN_TYPE, type)
     case warren_type
     when 'test' then Warren::Handler::Test.new
