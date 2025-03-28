@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
     the ability to switch in different adapters during testing and development.
   DESCRIPTION
   spec.homepage = 'https://github.com/sanger/warren'
-  spec.required_ruby_version = Gem::Requirement.new('>= 2.6.0')
+  spec.required_ruby_version = Gem::Requirement.new('>= 3.1.0')
   spec.license = 'GPL'
 
   spec.metadata['homepage_uri'] = spec.homepage
