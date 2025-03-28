@@ -100,7 +100,7 @@ module Warren
 
         yield
       ensure
-        ActiveRecord::Base.clear_active_connections!
+        ActiveRecord::Base.clear_active_connections
       end
 
       # Returns the rails environment
