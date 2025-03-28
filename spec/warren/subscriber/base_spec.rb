@@ -74,7 +74,7 @@ RSpec.describe Warren::Subscriber::Base do
         expect(subscription).to have_received(:ack).with('delivery_tag')
       end
 
-      it 'posts the  message to the delay exchange' do
+      it 'posts the message to the delay exchange' do
         expect(delayed).to have_received(:publish).with('Hello', routing_key: 'test.key', headers: { attempts: 1 })
       end
 
@@ -91,7 +91,7 @@ RSpec.describe Warren::Subscriber::Base do
         expect(subscription).to have_received(:nack).with('delivery_tag')
       end
 
-      it 'does not post the  message to the delay exchange' do
+      it 'does not post the message to the delay exchange' do
         expect(delayed).not_to have_received(:publish)
       end
 

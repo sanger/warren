@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
     the ability to switch in different adapters during testing and development.
   DESCRIPTION
   spec.homepage = 'https://github.com/sanger/warren'
-  spec.required_ruby_version = Gem::Requirement.new('>= 2.6.0')
+  spec.required_ruby_version = Gem::Requirement.new('>= 3.1.0')
   spec.license = 'GPL'
 
   spec.metadata['homepage_uri'] = spec.homepage
@@ -32,8 +32,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # Dependencies
-  spec.add_runtime_dependency 'bunny', '~> 2.17.0'
-  spec.add_runtime_dependency 'connection_pool', '~> 2.2.0'
+  spec.add_runtime_dependency 'bunny', '~> 2.17'
+  spec.add_runtime_dependency 'connection_pool', '~> 2.2'
   spec.add_runtime_dependency 'multi_json', '~> 1.0'
-  spec.add_runtime_dependency 'thor', '~> 1.1.0'
+  spec.add_runtime_dependency 'thor', '~> 1.1'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 end

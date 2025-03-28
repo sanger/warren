@@ -5,6 +5,24 @@ Unreleased section to make new releases easy.
 
 ## [Unreleased]
 
+### Changed
+
+- The WARREN_TYPE environmental variable can now fully replace the config yaml
+
+## [0.4.1] - 2022-01-04
+
+### Changed
+
+- Relaxed version constraints on dependencies
+
+## [0.4.0] - 2021-06-09
+
+### Fixed
+
+- Ensured backwards compatibility with 0.2.0
+
+## [0.3.0] - 2021-06-04
+
 ### Added
 
 - Added support for delay exchanges to process messages after a fixed delay
@@ -17,7 +35,7 @@ Unreleased section to make new releases easy.
 - Warren::Handler::Test and Warren::Handler::Test::Channel no loner respond to
   `add_exchange`. These methods were undocumented, and unused internally.
 
-## Changed
+### Changed
 
 - Messages must now implement `#headers`, although simply returning an empty
   hash is sufficient.

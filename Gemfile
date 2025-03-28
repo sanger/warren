@@ -15,4 +15,4 @@ gem 'simplecov'
 gem 'yard'
 
 # Used to provide instance_doubles for more robust testing
-gem 'activerecord', '~>5.2.0', require: false
+gem 'activerecord', '~>7.2.2.1', require: false

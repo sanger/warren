@@ -7,10 +7,11 @@ require 'helpers/configuration_helpers'
 
 RSpec.describe Warren::DelayExchange do
   subject(:delay_exchange) do
-    described_class.new(
-      channel: channel,
-      config: Configuration.delay_exchange_configuration(exchange_name: 'exchange_name', queue_name: 'queue_name')
-    )
+    described_class.new(channel: channel, config: config)
+  end
+
+  let(:config) do
+    Configuration.delay_exchange_configuration(exchange_name: 'exchange_name', queue_name: 'queue_name')
   end
 
   let(:queue) { instance_spy(Bunny::Queue) }
@@ -41,6 +42,16 @@ RSpec.describe Warren::DelayExchange do
 
     it 'registers bindings' do
       expect(queue).to have_received(:bind).with(exchange, {})
+    end
+
+    context 'when not configured' do
+      let(:config) { nil }
+
+      it 'does nothing', aggregate_failures: true do
+        expect(channel).not_to have_received(:queue)
+        expect(channel).not_to have_received(:exchange)
+        expect(queue).not_to have_received(:bind)
+      end
     end
   end
 
