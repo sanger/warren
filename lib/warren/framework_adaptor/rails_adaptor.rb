@@ -100,7 +100,7 @@ module Warren
 
         yield
       ensure
-        ActiveRecord::ConnectionAdapters::ConnectionPool.release_connection
+        ActiveRecord::ConnectionHandling.release_connection
       end
 
       # Returns the rails environment
