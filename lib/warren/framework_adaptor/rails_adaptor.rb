@@ -101,10 +101,10 @@ module Warren
         yield
       ensure
         # Although Rails 7.2 recommends using `ActiveRecord::Base.connection_handler.clear_active_connections!`
-        # to clear all active connections—especially in applications with multiple databases —
+        # to clear all active connections (especially in applications with multiple databases),
         # Y25-234 investigated the performance and applicability of this versus
         # `ActiveRecord::Base.connection_pool.release_connection`.
-        # 
+        #
         # Since Unified Warehouse (the primary Warren consumer) does not use multiple databases,
         # `release_connection` was found to be more targeted and performant.
         # Using `clear_active_connections!` would be redundant and potentially less efficient in this context.
