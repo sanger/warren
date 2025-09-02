@@ -103,6 +103,7 @@ module Warren
 
       #
       # Yields an {Warren::Handler::Broadcast::Channel} which gets returned to the pool on block closure
+      # NB: connection_pool used here is returned from the connection_pool method.
       #
       # @return [void]
       #
@@ -142,6 +143,8 @@ module Warren
         @session ||= Bunny.new(server_connection)
       end
 
+      # Returns a pool of Bunny::Channels.
+      # Ref: https://github.com/mperham/connection_pool?tab=readme-ov-file#usage
       def connection_pool
         @connection_pool ||= start_session && ConnectionPool.new(size: @pool_size, timeout: 5) do
           new_channel
