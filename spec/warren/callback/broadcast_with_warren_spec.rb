@@ -7,7 +7,7 @@ require 'warren/callback/broadcast_with_warren'
 RSpec.describe Warren::Callback::BroadcastWithWarren do
   let(:warren) { Warren::Handler::Test.new(routing_key_prefix: 'test') }
   let(:resource_key) { 'dummy_active_record' }
-  let(:routing_key) { "queue_broadcast.#{resource_key}.1" }
+  let(:routing_key) { "saved.#{resource_key}.1" }
   let(:broadcast_class) do
     Class.new(DummyActiveRecord) do
       include Warren::Callback
