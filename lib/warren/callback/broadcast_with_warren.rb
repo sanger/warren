@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'warren/message/short'
+require 'warren/message/full'
 
 module Warren
   module Callback
