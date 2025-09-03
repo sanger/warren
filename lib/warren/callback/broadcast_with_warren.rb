@@ -17,7 +17,7 @@ module Warren
       # @param handler [Warren::Handler] The handler to take the messaged
       # @param message_class [Warren::Message] The adaptor to render the messages
       #
-      def initialize(handler:, message_class: Warren::Message::Short)
+      def initialize(handler:, message_class: Warren::Message::Full)
         @handler = handler
         @message_class = message_class
       end
