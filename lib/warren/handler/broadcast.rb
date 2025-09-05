@@ -127,9 +127,12 @@ module Warren
       #                             in that case
       #
       def <<(message)
-        RubyProf.profile do
+        result = RubyProf.profile do
           with_channel { |channel| channel << message }
         end
+        # print a graph profile to text
+        printer = RubyProf::GraphPrinter.new(result)
+        printer.print($stdout, {})
         self
       end
 
