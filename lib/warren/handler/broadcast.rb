@@ -5,6 +5,9 @@ require 'forwardable'
 require 'connection_pool'
 require_relative 'base'
 
+require 'ruby-prof'
+
+
 module Warren
   module Handler
     #
@@ -124,7 +127,9 @@ module Warren
       #                             in that case
       #
       def <<(message)
-        with_channel { |channel| channel << message }
+        RubyProf.profile do
+          with_channel { |channel| channel << message }
+        end
         self
       end
 

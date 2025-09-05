@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'warren/message/full'
-
 module Warren
   module Callback
     # Warren::Callback::BroadcastWithWarren is a Callback class
