@@ -133,7 +133,7 @@ module Warren
           warn "Uncaught exception in channel: #{e.message}"
           warn "Consumer: #{consumer.inspect}"
         end
-        Channel.new(session.create_channel(nil, worker_count), exchange: @exchange_name,
+        Channel.new(bun_channel, exchange: @exchange_name,
                                                                routing_key_prefix: @routing_key_prefix)
       end
 
