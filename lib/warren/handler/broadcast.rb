@@ -153,8 +153,6 @@ module Warren
       end
 
       def start_session
-        session.start
-
         session.on_blocked do |connection_blocked|
           warn "Connection blocked: #{connection_blocked.reason}"
         end
@@ -162,7 +160,7 @@ module Warren
         session.on_unblocked do
           warn 'Connection unblocked'
         end
-
+        session.start
         true
       end
 
