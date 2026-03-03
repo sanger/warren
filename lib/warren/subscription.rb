@@ -35,7 +35,7 @@ module Warren
     # @return [Bunny::Consumer] The bunny consumer object
     #
     def subscribe(consumer_tag, &block)
-      channel.prefetch(10)
+      channel.prefetch(1)
       queue.subscribe(manual_ack: true, block: false, consumer_tag: consumer_tag, durable: true, &block)
     end
 
