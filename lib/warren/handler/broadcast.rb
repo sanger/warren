@@ -128,8 +128,12 @@ module Warren
       end
 
       def new_channel(worker_count: 1)
-        Channel.new(session.create_channel(nil, worker_count), exchange: @exchange_name,
-                                                               routing_key_prefix: @routing_key_prefix)
+        bun_channel = session.create_channel(nil, worker_count)
+        bun_channel.on_uncaught_exception do |e, consumer|
+          warn "Uncaught exception in channel: #{e.message}"
+          warn "Consumer: #{consumer.inspect}"
+        end
+        Channel.new(bun_channel, exchange: @exchange_name, routing_key_prefix: @routing_key_prefix)
       end
 
       private
@@ -149,6 +153,13 @@ module Warren
       end
 
       def start_session
+        session.on_blocked do |connection_blocked|
+          warn "Connection blocked: #{connection_blocked.reason}"
+        end
+
+        session.on_unblocked do
+          warn 'Connection unblocked'
+        end
         session.start
         true
       end
