@@ -51,8 +51,14 @@ module Warren
 
     private
 
+    # Applies the tag to the message, ensuring it is valid UTF-8 and safe for logging.
+    #
+    # @param message [Object] The message to tag
+    # @return [String] The tagged message
     def tag(message)
-      "#{@tag}: #{message}"
+      msg = message.to_s.dup.force_encoding('BINARY') # handle any encoding
+      msg = msg.encode('UTF-8', invalid: :replace, undef: :replace, replace: '?')
+      "#{@tag}: #{msg}"
     end
   end
 end
