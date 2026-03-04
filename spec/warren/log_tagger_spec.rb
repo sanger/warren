@@ -16,24 +16,41 @@ RSpec.describe Warren::LogTagger do
     allow(standard_logger).to receive(:error) { |&block| block&.call }
   end
 
-  shared_examples 'a logger' do |method|
+  shared_examples 'a logger' do |method| # rubocop:disable Metrics/BlockLength
+    let(:program) { 'program' }
+    let(:message) { 'message' }
+
     context 'without a block' do
-      before { logger.send(method, 'message') }
+      before { logger.send(method, message) }
 
       it 'tags the message' do
         expect(standard_logger).to have_received(method).with('tag: message')
       end
+
+      context 'with invalid UTF-8 bytes' do
+        let(:message) { "message\xFF".dup.force_encoding('ASCII-8BIT') }
+
+        it 'tags the message, replacing invalid bytes' do
+          expect(standard_logger).to have_received(method).with('tag: message?')
+        end
+      end
     end
 
     context 'with a block' do
-      subject(:method_call) { logger.send(method, 'program') { 'message' } }
+      subject(:method_call) { logger.send(method, program) { message } }
 
       it 'calls the logger as normal' do
         method_call
-        expect(standard_logger).to have_received(method).with('program')
+        expect(standard_logger).to have_received(method).with(program)
       end
 
       it { is_expected.to eq 'tag: message' }
+
+      context 'with invalid UTF-8 bytes' do
+        let(:message) { "message\xFF".dup.force_encoding('ASCII-8BIT') }
+
+        it { is_expected.to eq 'tag: message?' }
+      end
     end
   end
 
