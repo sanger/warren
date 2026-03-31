@@ -70,4 +70,36 @@ RSpec.describe Warren::DelayExchange do
       )
     end
   end
+
+  describe '#reopen!' do
+    subject(:delay_exchange) do
+      described_class.new(
+        channel: channel,
+        config: config,
+        channel_factory: -> { replacement_channel }
+      )
+    end
+
+    let(:replacement_channel) do
+      instance_spy(Warren::Handler::Broadcast::Channel, queue: queue, routing_key_prefix: 'test')
+    end
+
+    before do
+      allow(channel).to receive(:exchange).and_return(instance_spy(Bunny::Exchange))
+      allow(replacement_channel).to receive(:exchange).and_return(instance_spy(Bunny::Exchange))
+      allow(channel).to receive(:publish).and_return(channel)
+      allow(replacement_channel).to receive(:publish).and_return(replacement_channel)
+
+      delay_exchange.publish('before', routing_key: 'rk')
+      delay_exchange.reopen!
+      delay_exchange.publish('after', routing_key: 'rk')
+    end
+
+    it 'replaces the channel and uses it for subsequent publish' do
+      expect(replacement_channel).to have_received(:publish).with(
+        have_attributes(payload: 'after', routing_key: 'rk', headers: {}),
+        exchange: delay_exchange.send(:exchange)
+      )
+    end
+  end
 end
