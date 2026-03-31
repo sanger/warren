@@ -37,7 +37,17 @@ RSpec.describe Warren::Client do
 
     context 'with a single consumer' do
       let(:client) { described_class.new(config, consumers: ['consumer_a']) }
-      let(:fox) { instance_double(Warren::Fox, run!: true, attempt_recovery: true) }
+      let(:fox) do
+        instance_double(
+          Warren::Fox,
+          run!: true,
+          attempt_recovery: true,
+          running?: false,
+          consumer_present?: true,
+          pause!: true,
+          warn: true
+        )
+      end
       let(:den) { mock_den('consumer_a', fox) }
 
       before do
@@ -60,14 +70,23 @@ RSpec.describe Warren::Client do
       it 'enters a control loop' do
         expect(fox).to have_received(:attempt_recovery)
       end
+
+      it 'pauses a running fox that has no consumer to trigger recovery' do
+        allow(fox).to receive(:running?).and_return(true)
+        allow(fox).to receive(:consumer_present?).and_return(false)
+
+        run_client(client)
+
+        expect(fox).to have_received(:pause!)
+      end
     end
 
     context 'with all consumers' do
       let(:client) { described_class.new(config, consumers: nil) }
       let(:fox) do
         [
-          instance_spy(Warren::Fox, run!: true, attempt_recovery: true),
-          instance_spy(Warren::Fox, run!: true, attempt_recovery: true)
+          instance_spy(Warren::Fox, run!: true, attempt_recovery: true, running?: false, consumer_present?: true),
+          instance_spy(Warren::Fox, run!: true, attempt_recovery: true, running?: false, consumer_present?: true)
         ]
       end
 
@@ -96,7 +115,18 @@ RSpec.describe Warren::Client do
 
     context 'with a single consumer' do
       let(:client) { described_class.new(config, consumers: ['consumer_a']) }
-      let(:fox) { instance_double(Warren::Fox, run!: true, attempt_recovery: true, stop!: true) }
+      let(:fox) do
+        instance_double(
+          Warren::Fox,
+          run!: true,
+          attempt_recovery: true,
+          stop!: true,
+          running?: false,
+          consumer_present?: true,
+          pause!: true,
+          warn: true
+        )
+      end
 
       before do
         mock_den('consumer_a', fox)

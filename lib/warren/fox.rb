@@ -113,6 +113,16 @@ module Warren
       end
     end
 
+    # Returns whether a Bunny consumer is currently registered for this fox.
+    #
+    # Used by the client control loop to detect in-process cases where the fox
+    # is marked running but has no active consumer.
+    #
+    # @return [Boolean]
+    def consumer_present?
+      !@consumer.nil?
+    end
+
     private
 
     # Our consumer operates in another thread. It is non blocking.
