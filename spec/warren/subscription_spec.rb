@@ -60,4 +60,26 @@ RSpec.describe Warren::Subscription do
       expect(queue).to have_received(:bind).with(exchange, routing_key: 'test.c')
     end
   end
+
+  describe '#reopen!' do
+    subject(:subscription) do
+      described_class.new(
+        channel: channel,
+        config: Configuration.topic_exchange_queue,
+        channel_factory: -> { replacement_channel }
+      )
+    end
+
+    let(:replacement_channel) do
+      instance_spy(Warren::Handler::Broadcast::Channel, queue: queue, routing_key_prefix: 'test')
+    end
+
+    it 'replaces the channel and resets memoized queue' do
+      subscription.subscribe('first') { true }
+      subscription.reopen!
+      subscription.subscribe('second') { true }
+
+      expect(replacement_channel).to have_received(:queue).with('queue_name', queue_options)
+    end
+  end
 end
