@@ -167,9 +167,8 @@ module Warren
       end
 
       def connection_pool
-        @connection_pool ||= begin
-          start_session
-          ConnectionPool.new(size: @pool_size, timeout: 5) { new_channel }
+        @connection_pool ||= start_session && ConnectionPool.new(size: @pool_size, timeout: 5) do
+          new_channel
         end
       end
 
