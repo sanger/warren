@@ -4,6 +4,7 @@ require 'bunny'
 require 'forwardable'
 require 'connection_pool'
 require_relative 'base'
+require_relative '../exceptions'
 
 module Warren
   module Handler
@@ -175,10 +176,12 @@ module Warren
       # Starts the Bunny session with retry logic for connection failures.
       #
       # @note Exponential backoff: 1, 2, 4, 8, ... seconds,
-      #   capped at MAX_START_SESSION_DELAY and
-      #   up to MAX_START_SESSION_ATTEMPTS attempts before giving up.
+      #   capped at {MAX_START_SESSION_DELAY} and
+      #   up to {MAX_START_SESSION_ATTEMPTS} attempts before giving up.
       #
       # @return [true] Returns true if the session starts successfully.
+      # @raise [Warren::Exceptions::SessionStartError] if the Bunny session
+      #   cannot be started after {MAX_START_SESSION_ATTEMPTS} attempts.
       # rubocop:disable Metrics/MethodLength
       def start_session
         attempts = 0
@@ -187,8 +190,8 @@ module Warren
         rescue Bunny::Exception, Errno::ECONNREFUSED, Errno::ETIMEDOUT => e
           attempts += 1
           if attempts >= MAX_START_SESSION_ATTEMPTS
-            raise "Failed to start session (#{e.class}): #{e.message}, "\
-            "attempts: #{attempts}, giving up."
+            error_message = "Failed to start session (#{e.class}): #{e.message}, attempts: #{attempts}, giving up."
+            raise Warren::Exceptions::SessionStartError, error_message
           end
 
           wait = [2**(attempts - 1), MAX_START_SESSION_DELAY].min
