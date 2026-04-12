@@ -12,6 +12,9 @@ module Warren
     # threadsafe RabbitMQ channels for broadcasting messages
     #
     class Broadcast < Warren::Handler::Base
+      MAX_START_SESSION_DELAY = 5 * 60 # max seconds for exponential backoff
+      MAX_START_SESSION_ATTEMPTS = 30 # max count before giving up
+
       # Wraps a Bunny::Channel
       # @see https://rubydoc.info/gems/bunny/Bunny/Channel
       class Channel
@@ -138,20 +141,68 @@ module Warren
         ENV.fetch('WARREN_CONNECTION_URI', @server)
       end
 
+      # Creates or retrieves the Bunny session for RabbitMQ communication.
+      #
+      # @note using default parameters for the Bunny connection such as
+      # :automatically_recover (boolean, default: true): when false, will
+      #   disable automatic network failure recovery
+      # :network_recovery_interval (number, default: 5.0): interval between
+      #   reconnection attempts
+      # :heartbeat or :heartbeat_interval (string or integer, default: :server):
+      #   standard RabbitMQ server heartbeat. :server means "use the value
+      #   from RabbitMQ config". 0 means no heartbeats (not recommended).
+      #
+      # @note :automatically_recover option is used after the initial
+      #   connection is established. If the connection cannot be established
+      #   in the first place, it will raise an exception and not retry.
+      #   Therefore, the initial connection is retried separately in the
+      #   start_session method of this handler.
+      #
+      # @see http://rubybunny.info/articles/connecting.html
+      #
+      # @return [Bunny::Session] The Bunny session object used to manage the
+      #   connection to RabbitMQ.
       def session
         @session ||= Bunny.new(server_connection)
       end
 
       def connection_pool
-        @connection_pool ||= start_session && ConnectionPool.new(size: @pool_size, timeout: 5) do
-          new_channel
+        @connection_pool ||= begin
+          start_session
+          ConnectionPool.new(size: @pool_size, timeout: 5) { new_channel }
         end
       end
 
+      # Starts the Bunny session with retry logic for connection failures.
+      #
+      # @note Exponential backoff: 1, 2, 4, 8, ... seconds,
+      #   capped at MAX_START_SESSION_DELAY and
+      #   up to MAX_START_SESSION_ATTEMPTS attempts before giving up.
+      #
+      # @return [true] Returns true if the session starts successfully.
+      # rubocop:disable Metrics/MethodLength
       def start_session
-        session.start
+        attempts = 0
+        begin
+          session.start
+        rescue Bunny::Exception, Errno::ECONNREFUSED, Errno::ETIMEDOUT => e
+          attempts += 1
+          if attempts >= MAX_START_SESSION_ATTEMPTS
+            raise "Failed to start session (#{e.class}): #{e.message}, "\
+            "attempts: #{attempts}, giving up."
+          end
+
+          wait = [2**(attempts - 1), MAX_START_SESSION_DELAY].min
+          $stdout.puts(
+            "Failed to start session (#{e.class}): #{e.message}, " \
+            "attempts: #{attempts}, retrying in #{wait}s..."
+          )
+          sleep wait
+          retry
+        end
         true
       end
+      # rubocop:enable Metrics/MethodLength
 
       def close_session
         reset_pool
