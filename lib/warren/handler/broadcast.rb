@@ -200,7 +200,7 @@ module Warren
             "attempts: #{attempts}, retrying in #{wait}s..."
           )
           sleep wait
-          retry
+          retry # Go to begin block
         end
         true
       end
