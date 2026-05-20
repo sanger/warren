@@ -77,7 +77,8 @@ module Warren
       # @param [Integer] pool_size The connection pool size
       # @param [String,nil] routing_key_prefix The prefix to pass before the routing key.
       #                                        Can be used to ensure environments remain distinct.
-      def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14)
+      # @param [Hash] _kwargs Any additional keyword arguments
+      def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14, **_kwargs)
         super()
         @server = server
         @exchange_name = exchange
