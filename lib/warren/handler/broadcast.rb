@@ -13,8 +13,8 @@ module Warren
     # threadsafe RabbitMQ channels for broadcasting messages
     #
     class Broadcast < Warren::Handler::Base
-      MAX_START_SESSION_DELAY = 5 * 60 # max seconds for exponential backoff
-      MAX_START_SESSION_ATTEMPTS = 30 # max count before giving up
+      MAX_START_SESSION_DELAY = 5 * 60 # default seconds for exponential backoff
+      MAX_START_SESSION_ATTEMPTS = 30 # default max count before giving up
 
       # Wraps a Bunny::Channel
       # @see https://rubydoc.info/gems/bunny/Bunny/Channel
@@ -77,13 +77,15 @@ module Warren
       # @param [Integer] pool_size The connection pool size
       # @param [String,nil] routing_key_prefix The prefix to pass before the routing key.
       #                                        Can be used to ensure environments remain distinct.
-      # @param [Hash] _kwargs Any additional keyword arguments
-      def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14, **_kwargs)
+      # @param [Hash] kwargs Any additional keyword arguments from configuration.
+      def initialize(exchange:, routing_key_prefix:, server: {}, pool_size: 14, **kwargs)
         super()
         @server = server
         @exchange_name = exchange
         @pool_size = pool_size
         @routing_key_prefix = routing_key_prefix
+        @max_start_session_delay = kwargs[:max_start_session_delay] || MAX_START_SESSION_DELAY
+        @max_start_session_attempts = kwargs[:max_start_session_attempts] || MAX_START_SESSION_ATTEMPTS
       end
 
       #
@@ -177,12 +179,12 @@ module Warren
       # Starts the Bunny session with retry logic for connection failures.
       #
       # @note Exponential backoff: 1, 2, 4, 8, ... seconds,
-      #   capped at {MAX_START_SESSION_DELAY} and
-      #   up to {MAX_START_SESSION_ATTEMPTS} attempts before giving up.
+      #   capped at {@max_start_session_delay} and
+      #   up to {@max_start_session_attempts} attempts before giving up.
       #
       # @return [true] Returns true if the session starts successfully.
       # @raise [Warren::Exceptions::SessionStartError] if the Bunny session
-      #   cannot be started after {MAX_START_SESSION_ATTEMPTS} attempts.
+      #   cannot be started after {@max_start_session_attempts} attempts.
       # rubocop:disable Metrics/MethodLength
       def start_session
         attempts = 0
@@ -190,12 +192,12 @@ module Warren
           session.start
         rescue Bunny::Exception, Errno::ECONNREFUSED, Errno::ETIMEDOUT => e
           attempts += 1
-          if attempts >= MAX_START_SESSION_ATTEMPTS
+          if attempts >= @max_start_session_attempts
             error_message = "Failed to start session (#{e.class}): #{e.message}, attempts: #{attempts}, giving up."
             raise Warren::Exceptions::SessionStartError, error_message
           end
 
-          wait = [2**(attempts - 1), MAX_START_SESSION_DELAY].min
+          wait = [2**(attempts - 1), @max_start_session_delay].min
           $stdout.puts(
             "Failed to start session (#{e.class}): #{e.message}, " \
             "attempts: #{attempts}, retrying in #{wait}s..."
