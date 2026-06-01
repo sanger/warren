@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_record'
+
 module Warren
   # Namespace for framework adaptors.
   #
@@ -35,31 +37,27 @@ module Warren
     # The RailsAdaptor provides error handling and application
     # loading for Rails applications
     class RailsAdaptor
-      # Matches errors associated with database connection loss.
-      # To understand exactly how this works, we need to go under the hood of
-      # `rescue`.
-      # When an exception is raised in Ruby, the interpreter begins unwinding
-      # the stack, looking for `rescue` statements. For each one it
-      # finds it performs the check `ExceptionClass === raised_exception`,
-      # and if this returns true, it enters the rescue block, otherwise it
-      # continues unwinding the stack.
-      # Under normal circumstances Class#=== returns true for instances of that
-      # class. Here we override that behaviour and explicitly check for a
-      # database connection instead. This ensures that regardless of what
-      # exception gets thrown if we loose access to the database, we correctly
-      # handle the message
+      # Matches exceptions that represent a lost or unavailable database
+      # connection, so they can be treated as temporary issues (pause + requeue)
+      # rather than permanent message failures (dead-letter).
+      #
+      # We override `===` so this can be used directly in a `rescue` clause.
+      # When an exception is raised, Ruby evaluates `ConnectionMissing === e`;
+      # returning true here causes the rescue block to be entered.
+      #
+      # ActiveRecord wraps all adapter-level connection errors in its own
+      # exception hierarchy, so checking these classes is both reliable and
+      # adapter-agnostic. Add to CONNECTION_ERRORS if new connectivity
+      # exception types need to be treated as temporary issues.
       class ConnectionMissing
-        def self.===(_)
-          # We used to inspect the exception, and try and check it against a list
-          # of errors that might indicate connectivity issues. But this list
-          # just grew and grew over time. So instead we just explicitly check
-          # the outcome
-          !ActiveRecord::Base.connection.active?
-        rescue StandardError => _e
-          # Unfortunately ActiveRecord::Base.connection.active? can throw an
-          # exception if it is unable to connect, and furthermore the class
-          # depends on the adapter used.
-          true
+        CONNECTION_ERRORS = [
+          ActiveRecord::ConnectionNotEstablished,
+          ActiveRecord::ConnectionFailed,
+          ActiveRecord::AdapterTimeout
+        ].freeze
+
+        def self.===(exception)
+          CONNECTION_ERRORS.any? { |klass| exception.is_a?(klass) }
         end
       end
 
