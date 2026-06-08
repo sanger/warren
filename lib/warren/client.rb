@@ -103,9 +103,26 @@ module Warren
         stopped!
       else
         # Prompt any sleeping workers to check if they need to recover
-        foxes.each(&:attempt_recovery)
+        foxes.each do |fox|
+          pause_running_fox_without_consumer(fox)
+          fox.attempt_recovery
+        end
         sleep(SECONDS_TO_SLEEP)
       end
+    end
+
+    # Forces a running fox into the normal pause/recovery flow when it has no
+    # active consumer object.
+    #
+    # This handles cases where a fox is marked running but has no active consumer.
+    #
+    # @param fox [Warren::Fox] The fox to inspect
+    # @return [void]
+    def pause_running_fox_without_consumer(fox)
+      return unless fox.running? && !fox.consumer_present?
+
+      fox.warn { 'Consumer missing while running; pausing to trigger recovery' }
+      fox.pause!
     end
   end
 end

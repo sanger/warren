@@ -14,8 +14,12 @@ module Warren
     # @param channel [Warren::Handler::Broadcast::Channel] A channel on which to register queues
     # @param config [Hash] queue configuration hash
     #
-    def initialize(channel:, config:)
+    def initialize(channel:, config:, channel_factory: nil)
       @channel = channel
+      # Use a factory so Subscription can recover from channel closure.
+      # In Fox recovery, reopen! can reuse an explicit channel; if none is
+      # passed, reopen! creates one via channel_factory.
+      @channel_factory = channel_factory
       @queue_name = config&.fetch('name')
       @queue_options = config&.fetch('options')
       @bindings = config&.fetch('bindings')
@@ -43,6 +47,19 @@ module Warren
     # keys: additional routing_keys to bind
     def activate!
       establish_bindings!
+    end
+
+    # Recreates the channel and clears memoized queue state.
+    # Used after broker-side channel closure.
+    #
+    # @param channel [Warren::Handler::Broadcast::Channel, nil]
+    #   Optional channel to reuse instead of creating a new one.
+    def reopen!(channel: nil)
+      raise StandardError, 'No channel factory configured' unless @channel_factory || channel
+
+      @channel = channel || @channel_factory.call
+      @queue = nil
+      self
     end
 
     private

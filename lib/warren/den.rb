@@ -56,13 +56,13 @@ module Warren
     #
     # @return [Warren::Fox]
     def spawn_fox
-      # We don't use with_channel as our consumer persists outside the block,
-      # and while we *can* share channels between consumers it results in them
-      # sharing the same worker pool. This process lets us control workers on
-      # a per-queue basis. Currently that just means one worker per consumer.
-      channel = Warren.handler.new_channel(worker_count: worker_count)
-      subscription = Warren::Subscription.new(channel: channel, config: queue_config)
-      delay = Warren::DelayExchange.new(channel: channel, config: delay_config)
+      # A fox is long-lived, so it needs its own channel instance.
+      # Use `channel_factory` so recovery can create a fresh channel if
+      # RabbitMQ closes the current one.
+      channel_factory = -> { Warren.handler.new_channel(worker_count: worker_count) }
+      channel = channel_factory.call
+      subscription = Warren::Subscription.new(channel: channel, config: queue_config, channel_factory: channel_factory)
+      delay = Warren::DelayExchange.new(channel: channel, config: delay_config, channel_factory: channel_factory)
       Warren::Fox.new(name: @app_name,
                       subscription: subscription,
                       adaptor: @adaptor,
