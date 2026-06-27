@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'connection_pool', '~> 2.2'
   # multi_json 1.18.0-1.19.1 have issues with serialising ActiveRecord objects
   # related to https://github.com/sferik/multi_json/issues/54
-  spec.add_runtime_dependency 'multi_json', ['>= 1.0', '< 1.18.0']
+  spec.add_runtime_dependency 'multi_json', ['>= 1.0', '<= 1.19.1']
   spec.add_runtime_dependency 'thor', '~> 1.1'
   spec.metadata['rubygems_mfa_required'] = 'true'
 end
