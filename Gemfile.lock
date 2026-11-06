@@ -10,13 +10,13 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (7.2.3.1)
-      activesupport (= 7.2.3.1)
-    activerecord (7.2.3.1)
-      activemodel (= 7.2.3.1)
-      activesupport (= 7.2.3.1)
+    activemodel (8.0.5.2)
+      activesupport (= 8.0.5.2)
+    activerecord (8.0.5.2)
+      activemodel (= 8.0.5.2)
+      activesupport (= 8.0.5.2)
       timeout (>= 0.4.0)
-    activesupport (7.2.3.1)
+    activesupport (8.0.5.2)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -25,32 +25,36 @@ GEM
       drb
       i18n (>= 1.6, < 2)
       logger (>= 1.4.2)
-      minitest (>= 5.1, < 6)
+      minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     amq-protocol (2.3.3)
     ast (2.4.2)
     base64 (0.3.0)
     benchmark (0.5.0)
-    bigdecimal (4.0.1)
+    bigdecimal (4.1.3)
     bunny (2.24.0)
       amq-protocol (~> 2.3)
       sorted_set (~> 1, >= 1.0.2)
     coderay (1.1.3)
-    concurrent-ruby (1.3.7)
+    concurrent-ruby (1.3.8)
     connection_pool (2.5.5)
     diff-lcs (1.4.4)
     docile (1.4.0)
     drb (2.2.3)
-    i18n (1.14.8)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     logger (1.7.0)
     method_source (1.0.0)
-    minitest (5.27.0)
+    minitest (6.0.6)
+      drb (~> 2.0)
+      prism (~> 1.5)
     multi_json (1.17.0)
     parallel (1.20.1)
     parser (3.0.1.1)
       ast (~> 2.4.1)
+    prism (1.9.0)
     pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -105,6 +109,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.0.0)
+    uri (1.1.2)
     yard (0.9.44)
 
 PLATFORMS
@@ -112,7 +117,7 @@ PLATFORMS
   x86_64-darwin-19
 
 DEPENDENCIES
-  activerecord (~> 7.2.3.1)
+  activerecord (~> 8.0.5.2)
   pry
   rake (~> 13.0)
   rspec (~> 3.0)
